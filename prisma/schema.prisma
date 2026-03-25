@@ -24,8 +24,10 @@ model User {
 }
 
 model Board {
-  id    String @id @default(cuid())
-  title String
+  id          String  @id @default(cuid())
+  title       String
+  description String?
+  color       String?
 
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)

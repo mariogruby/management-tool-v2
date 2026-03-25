@@ -10,7 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { useState } from "react";
-import { CreateBoardForm } from "./CreateBoardForm";
+import { CreateBoardStepper } from "./CreateBoardStepper";
 
 export function CreateBoardModal() {
   const [open, setOpen] = useState(false);
@@ -25,7 +25,7 @@ export function CreateBoardModal() {
         <DialogHeader>
           <DialogTitle>Crear nuevo board</DialogTitle>
         </DialogHeader>
-        <CreateBoardForm onSuccess={() => setOpen(false)} />
+        <CreateBoardStepper onSuccess={() => setOpen(false)} />
       </DialogContent>
     </Dialog>
   );
