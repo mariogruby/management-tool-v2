@@ -8,6 +8,7 @@ import { BoardFormData, DEFAULT_LISTS } from "./CreateBoardStepper.types";
 import { StepBasicInfo } from "./steps/StepBasicInfo";
 import { StepColorPicker } from "./steps/StepColorPicker";
 import { StepInitialLists } from "./steps/StepInitialLists";
+import { useBoardsStore } from "@/store/useBoardsStore";
 
 interface CreateBoardStepperProps {
   onSuccess: () => void;
@@ -28,6 +29,7 @@ export function CreateBoardStepper({ onSuccess }: CreateBoardStepperProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+  const addBoard = useBoardsStore((s) => s.addBoard);
 
   const patch = (partial: Partial<BoardFormData>) =>
     setData((prev) => ({ ...prev, ...partial }));
@@ -55,6 +57,8 @@ export function CreateBoardStepper({ onSuccess }: CreateBoardStepperProps) {
         return;
       }
 
+      const board = await res.json();
+      addBoard(board);
       setStep(0);
       setData(INITIAL_DATA);
       onSuccess();

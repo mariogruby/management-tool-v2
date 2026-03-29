@@ -4,9 +4,8 @@ import {
   SidebarFooter,
   SidebarGroup,
   SidebarHeader,
-} from "@/components/ui/sidebar"
-
-import { SidebarRoutes } from "../SidebarRoutes/SidebarRoutes"
+} from "@/components/ui/sidebar";
+import { SidebarRoutes } from "../SidebarRoutes/SidebarRoutes";
 
 export function AppSidebar() {
   return (
@@ -19,5 +18,5 @@ export function AppSidebar() {
       </SidebarContent>
       <SidebarFooter />
     </Sidebar>
-  )
+  );
 }
