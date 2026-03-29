@@ -32,7 +32,7 @@ export default async function BoardPage({ params }: BoardPageProps) {
           <p className="text-muted-foreground mt-1 text-sm">{board.description}</p>
         )}
       </div>
-      <ListContainer lists={board.list} />
+      <ListContainer lists={board.list} boardId={board.id} />
     </div>
   );
 }

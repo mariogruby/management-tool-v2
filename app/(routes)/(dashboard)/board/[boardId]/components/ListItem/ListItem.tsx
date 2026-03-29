@@ -1,5 +1,6 @@
 import { ListItemProps } from "./ListItem.types";
 import { TaskCard } from "../TaskCard/TaskCard";
+import { CreateTaskForm } from "../CreateTaskForm/CreateTaskForm";
 
 export function ListItem({ list }: ListItemProps) {
   return (
@@ -13,6 +14,7 @@ export function ListItem({ list }: ListItemProps) {
           <TaskCard key={task.id} task={task} />
         ))}
       </div>
+      <CreateTaskForm listId={list.id} />
     </div>
   );
 }
