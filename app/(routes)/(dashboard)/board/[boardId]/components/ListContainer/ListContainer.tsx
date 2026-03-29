@@ -1,11 +1,6 @@
-import { ListWithTasks } from "../TaskCard/TaskCard.types";
 import { ListItem } from "../ListItem/ListItem";
 import { CreateListForm } from "../CreateListForm/CreateListForm";
-
-interface ListContainerProps {
-  lists: ListWithTasks[];
-  boardId: string;
-}
+import { ListContainerProps } from "./ListContainer.types";
 
 export function ListContainer({ lists, boardId }: ListContainerProps) {
   return (

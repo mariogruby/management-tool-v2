@@ -1,20 +1,17 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { useRouter } from "next/navigation";
 import { Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-
-interface CreateTaskFormProps {
-  listId: string;
-}
+import { useBoardStore } from "../../store/useBoardStore";
+import { CreateTaskFormProps } from "./CreateTaskForm.types";
 
 export function CreateTaskForm({ listId }: CreateTaskFormProps) {
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
+  const addTask = useBoardStore((s) => s.addTask);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleOpen = () => {
@@ -39,8 +36,9 @@ export function CreateTaskForm({ listId }: CreateTaskFormProps) {
       });
 
       if (res.ok) {
+        const task = await res.json();
+        addTask(listId, task);
         handleClose();
-        router.refresh();
       }
     } finally {
       setLoading(false);
@@ -73,7 +71,11 @@ export function CreateTaskForm({ listId }: CreateTaskFormProps) {
         className="text-sm"
       />
       <div className="flex items-center gap-1">
-        <Button size="sm" onClick={handleSubmit} disabled={!title.trim() || loading}>
+        <Button
+          size="sm"
+          onClick={handleSubmit}
+          disabled={!title.trim() || loading}
+        >
           {loading ? "Añadiendo..." : "Añadir"}
         </Button>
         <Button size="icon" variant="ghost" onClick={handleClose}>

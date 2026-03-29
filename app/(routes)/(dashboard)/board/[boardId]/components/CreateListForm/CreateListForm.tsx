@@ -1,20 +1,17 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { useRouter } from "next/navigation";
 import { Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-
-interface CreateListFormProps {
-  boardId: string;
-}
+import { useBoardStore } from "../../store/useBoardStore";
+import {CreateListFormProps} from "./CreateListForm.types"
 
 export function CreateListForm({ boardId }: CreateListFormProps) {
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
+  const addList = useBoardStore((s) => s.addList);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleOpen = () => {
@@ -39,8 +36,9 @@ export function CreateListForm({ boardId }: CreateListFormProps) {
       });
 
       if (res.ok) {
+        const list = await res.json();
+        addList({ ...list, tasks: [] });
         handleClose();
-        router.refresh();
       }
     } finally {
       setLoading(false);

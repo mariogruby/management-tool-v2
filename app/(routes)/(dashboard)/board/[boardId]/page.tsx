@@ -1,7 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import db from "@/lib/db";
-import { ListContainer } from "./components/ListContainer/ListContainer";
+import { BoardContent } from "./components/BoardContent/BoardContent";
 
 interface BoardPageProps {
   params: Promise<{ boardId: string }>;
@@ -32,7 +32,7 @@ export default async function BoardPage({ params }: BoardPageProps) {
           <p className="text-muted-foreground mt-1 text-sm">{board.description}</p>
         )}
       </div>
-      <ListContainer lists={board.list} boardId={board.id} />
+      <BoardContent lists={board.list} boardId={board.id} />
     </div>
   );
 }

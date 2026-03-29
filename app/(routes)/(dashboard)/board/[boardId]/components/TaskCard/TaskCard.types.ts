@@ -3,6 +3,7 @@ import type { TaskModel } from "@/lib/generated/prisma/models/Task";
 
 export type ListWithTasks = ListModel & { tasks: TaskModel[] };
 
-export interface TaskCardProps {
+export type TaskCardProps = {
   task: TaskModel;
+  listId: string;
 }
