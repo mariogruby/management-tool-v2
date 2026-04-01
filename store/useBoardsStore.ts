@@ -5,10 +5,13 @@ type BoardsState = {
   boards: BoardModel[];
   setBoards: (boards: BoardModel[]) => void;
   addBoard: (board: BoardModel) => void;
+  removeBoard: (boardId: string) => void;
 };
 
 export const useBoardsStore = create<BoardsState>((set) => ({
   boards: [],
   setBoards: (boards) => set({ boards }),
   addBoard: (board) => set((state) => ({ boards: [board, ...state.boards] })),
+  removeBoard: (boardId) =>
+    set((state) => ({ boards: state.boards.filter((b) => b.id !== boardId) })),
 }));

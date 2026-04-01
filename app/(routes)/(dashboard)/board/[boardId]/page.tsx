@@ -2,6 +2,7 @@ import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import db from "@/lib/db";
 import { BoardContent } from "./components/BoardContent/BoardContent";
+import { BoardActions } from "./components/BoardActions/BoardActions";
 
 interface BoardPageProps {
   params: Promise<{ boardId: string }>;
@@ -26,11 +27,14 @@ export default async function BoardPage({ params }: BoardPageProps) {
 
   return (
     <div className="flex flex-col h-full p-6 gap-6">
-      <div>
-        <h1 className="text-2xl font-bold">{board.title}</h1>
-        {board.description && (
-          <p className="text-muted-foreground mt-1 text-sm">{board.description}</p>
-        )}
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">{board.title}</h1>
+          {board.description && (
+            <p className="text-muted-foreground mt-1 text-sm">{board.description}</p>
+          )}
+        </div>
+        <BoardActions boardId={board.id} />
       </div>
       <BoardContent lists={board.list} boardId={board.id} />
     </div>
