@@ -14,16 +14,28 @@ export function BoardsSection() {
 
   return (
     <div className="flex flex-col gap-1">
-      <button
-        onClick={() => setOpen((o) => !o)}
-        className="flex items-center justify-between gap-2 px-3 py-2 rounded-md text-sm text-muted-foreground hover:bg-muted transition w-full"
+      <div
+        className={cn(
+          "flex items-center rounded-md text-sm transition",
+          pathname === "/dashboard/boards"
+            ? "bg-muted font-medium"
+            : "text-muted-foreground hover:bg-muted"
+        )}
       >
-        <div className="flex items-center gap-2">
+        <Link
+          href="/dashboard/boards"
+          className="flex items-center gap-2 flex-1 px-3 py-2"
+        >
           <Kanban size={18} />
           Boards
-        </div>
-        {open ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-      </button>
+        </Link>
+        <button
+          onClick={() => setOpen((o) => !o)}
+          className="pr-3 py-2 text-muted-foreground"
+        >
+          {open ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+        </button>
+      </div>
 
       {open && (
         <div className="flex flex-col gap-0.5 pl-4">

@@ -6,6 +6,8 @@ import {
   SidebarHeader,
 } from "@/components/ui/sidebar";
 import { SidebarRoutes } from "../SidebarRoutes/SidebarRoutes";
+import { SidebarItem } from "../SidebarRoutes/SidebarItem/SidebarItem";
+import { Settings } from "lucide-react";
 
 export function AppSidebar() {
   return (
@@ -16,7 +18,9 @@ export function AppSidebar() {
         <SidebarRoutes />
         <SidebarGroup />
       </SidebarContent>
-      <SidebarFooter />
+      <SidebarFooter className="p-2">
+        <SidebarItem item={{ label: "Settings", href: "/dashboard/settings", icon: <Settings size={18} /> }} />
+      </SidebarFooter>
     </Sidebar>
   );
 }
