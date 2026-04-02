@@ -13,6 +13,10 @@ interface BoardState {
   addList: (list: ListWithTasks) => void;
   addTask: (listId: string, task: TaskModel) => void;
 
+  // Eliminar
+  removeList: (listId: string) => void;
+  removeTask: (listId: string, taskId: string) => void;
+
   // Reordenar (DND)
   reorderLists: (oldIndex: number, newIndex: number) => void;
   moveTask: (
@@ -37,6 +41,20 @@ export const useBoardStore = create<BoardState>((set) => ({
         list.id === listId
           ? { ...list, tasks: [...list.tasks, task] }
           : list
+      ),
+    })),
+
+  removeList: (listId) =>
+    set((state) => ({
+      lists: state.lists.filter((l) => l.id !== listId),
+    })),
+
+  removeTask: (listId, taskId) =>
+    set((state) => ({
+      lists: state.lists.map((l) =>
+        l.id === listId
+          ? { ...l, tasks: l.tasks.filter((t) => t.id !== taskId) }
+          : l
       ),
     })),
 

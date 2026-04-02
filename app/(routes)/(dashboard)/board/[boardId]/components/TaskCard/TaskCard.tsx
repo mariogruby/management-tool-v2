@@ -3,6 +3,7 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { TaskCardProps } from "./TaskCard.types";
+import { TaskActions } from "../TaskActions/TaskActions";
 
 export function TaskCard({ task, listId }: TaskCardProps) {
   const {
@@ -29,9 +30,12 @@ export function TaskCard({ task, listId }: TaskCardProps) {
       style={style}
       {...attributes}
       {...listeners}
-      className="bg-background rounded-lg px-3 py-2 shadow-sm border text-sm cursor-grab active:cursor-grabbing hover:border-primary/50 transition-colors"
+      className="group bg-background rounded-lg px-3 py-2 shadow-sm border text-sm cursor-grab active:cursor-grabbing hover:border-primary/50 transition-colors flex items-center justify-between gap-2"
     >
-      {task.title}
+      <span>{task.title}</span>
+      <div onPointerDown={(e) => e.stopPropagation()}>
+        <TaskActions taskId={task.id} listId={listId} />
+      </div>
     </div>
   );
 }
