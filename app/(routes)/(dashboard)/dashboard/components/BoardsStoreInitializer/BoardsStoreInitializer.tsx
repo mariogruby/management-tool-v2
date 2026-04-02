@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect } from "react";
 import type { BoardModel } from "@/lib/generated/prisma/models/Board";
 import { useBoardsStore } from "@/store/useBoardsStore";
 
@@ -9,7 +9,7 @@ type BoardsStoreInitializerProps = {
 };
 
 export function BoardsStoreInitializer({ boards }: BoardsStoreInitializerProps) {
-  useMemo(() => {
+  useEffect(() => {
     useBoardsStore.setState({ boards });
   }, [boards]);
 

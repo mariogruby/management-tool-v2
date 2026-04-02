@@ -6,6 +6,7 @@ type BoardsState = {
   setBoards: (boards: BoardModel[]) => void;
   addBoard: (board: BoardModel) => void;
   removeBoard: (boardId: string) => void;
+  renameBoard: (boardId: string, title: string) => void;
 };
 
 export const useBoardsStore = create<BoardsState>((set) => ({
@@ -14,4 +15,8 @@ export const useBoardsStore = create<BoardsState>((set) => ({
   addBoard: (board) => set((state) => ({ boards: [board, ...state.boards] })),
   removeBoard: (boardId) =>
     set((state) => ({ boards: state.boards.filter((b) => b.id !== boardId) })),
+  renameBoard: (boardId, title) =>
+    set((state) => ({
+      boards: state.boards.map((b) => (b.id === boardId ? { ...b, title } : b)),
+    })),
 }));
