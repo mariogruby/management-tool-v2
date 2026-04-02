@@ -13,6 +13,9 @@ interface BoardState {
   addList: (list: ListWithTasks) => void;
   addTask: (listId: string, task: TaskModel) => void;
 
+  // Editar
+  renameList: (listId: string, title: string) => void;
+
   // Eliminar
   removeList: (listId: string) => void;
   removeTask: (listId: string, taskId: string) => void;
@@ -42,6 +45,11 @@ export const useBoardStore = create<BoardState>((set) => ({
           ? { ...list, tasks: [...list.tasks, task] }
           : list
       ),
+    })),
+
+  renameList: (listId, title) =>
+    set((state) => ({
+      lists: state.lists.map((l) => (l.id === listId ? { ...l, title } : l)),
     })),
 
   removeList: (listId) =>

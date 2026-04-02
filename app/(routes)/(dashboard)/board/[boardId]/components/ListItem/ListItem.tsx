@@ -5,7 +5,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { ListItemProps } from "./ListItem.types";
 import { TaskCard } from "../TaskCard/TaskCard";
 import { CreateTaskForm } from "../CreateTaskForm/CreateTaskForm";
-import { ListActions } from "../ListActions/ListActions";
+import { ListHeader } from "../ListHeader/ListHeader";
 
 export function ListItem({ list }: ListItemProps) {
   const {
@@ -33,18 +33,11 @@ export function ListItem({ list }: ListItemProps) {
       className="flex flex-col bg-muted rounded-xl w-64 shrink-0 p-3 gap-2"
     >
       <div
-        className="flex items-center justify-between px-1 cursor-grab active:cursor-grabbing"
+        className="cursor-grab active:cursor-grabbing"
         {...attributes}
         {...listeners}
       >
-        <h3 className="font-semibold text-sm">{list.title}</h3>
-        <div
-          className="flex items-center gap-1"
-          onPointerDown={(e) => e.stopPropagation()}
-        >
-          <span className="text-xs text-muted-foreground">{list.tasks.length}</span>
-          <ListActions listId={list.id} />
-        </div>
+        <ListHeader listId={list.id} title={list.title} taskCount={list.tasks.length} />
       </div>
       <SortableContext
         items={list.tasks.map((t) => t.id)}
