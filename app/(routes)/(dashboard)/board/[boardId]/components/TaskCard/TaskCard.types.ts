@@ -6,4 +6,5 @@ export type ListWithTasks = ListModel & { tasks: TaskModel[] };
 export type TaskCardProps = {
   task: TaskModel;
   listId: string;
+  listTitle: string;
 }

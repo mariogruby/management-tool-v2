@@ -45,7 +45,7 @@ export function ListItem({ list }: ListItemProps) {
       >
         <div className="flex flex-col gap-2">
           {list.tasks.map((task) => (
-            <TaskCard key={task.id} task={task} listId={list.id} />
+            <TaskCard key={task.id} task={task} listId={list.id} listTitle={list.title} />
           ))}
         </div>
       </SortableContext>
