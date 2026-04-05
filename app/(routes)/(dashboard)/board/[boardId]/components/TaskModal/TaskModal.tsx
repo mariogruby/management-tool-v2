@@ -23,6 +23,8 @@ export function TaskModal({ task, listId, listTitle, boardId, open, onClose }: T
   const [description, setDescription] = useState(task.description ?? "");
   const [savedDescription, setSavedDescription] = useState(task.description ?? "");
   const [completed, setCompleted] = useState(task.completed);
+  const [currentStartDate, setCurrentStartDate] = useState<Date | null>(task.startDate ?? null);
+  const [currentDueDate, setCurrentDueDate] = useState<Date | null>(task.dueDate ?? null);
   const [editingTitle, setEditingTitle] = useState(false);
   const [editingDescription, setEditingDescription] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -117,18 +119,36 @@ export function TaskModal({ task, listId, listTitle, boardId, open, onClose }: T
               )}
             </div>
 
-            <TaskLabels
-              taskId={task.id}
-              boardId={boardId}
-              activeLabels={task.labels}
-            />
+            {/* Labels + Dates row */}
+            <div className="flex flex-col gap-2">
+              <div className="flex gap-2">
+                <TaskLabels
+                  taskId={task.id}
+                  boardId={boardId}
+                  activeLabels={task.labels}
+                />
+                {!currentStartDate && !currentDueDate && (
+                  <TaskDatePicker
+                    taskId={task.id}
+                    listId={listId}
+                    startDate={currentStartDate}
+                    dueDate={currentDueDate}
+                    onSaved={(s, d) => { setCurrentStartDate(s); setCurrentDueDate(d); }}
+                  />
+                )}
+              </div>
 
-            <TaskDatePicker
-              taskId={task.id}
-              listId={listId}
-              startDate={task.startDate ?? null}
-              dueDate={task.dueDate ?? null}
-            />
+              {(currentStartDate || currentDueDate) && (
+                <TaskDatePicker
+                  taskId={task.id}
+                  listId={listId}
+                  startDate={currentStartDate}
+                  dueDate={currentDueDate}
+                  hideTrigger
+                  onSaved={(s, d) => { setCurrentStartDate(s); setCurrentDueDate(d); }}
+                />
+              )}
+            </div>
 
             <div className="flex flex-col gap-2">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">

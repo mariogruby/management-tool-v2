@@ -19,6 +19,8 @@ export function TaskDatePicker({
   listId,
   startDate,
   dueDate,
+  hideTrigger = false,
+  onSaved,
 }: TaskDatePickerProps) {
   const updateTask = useBoardStore((s) => s.updateTask);
 
@@ -36,7 +38,7 @@ export function TaskDatePicker({
     dueDate ? String(dueDate.getMinutes()).padStart(2, "0") : "59",
   );
 
-  const [selecting, setSelecting] = useState<"start" | "due">("start");
+  const [selecting, setSelecting] = useState<"start" | "due">(dueDate && !startDate ? "due" : "start");
 
   const buildDueWithTime = (day: Date | undefined) => {
     if (!day) return undefined;
@@ -61,34 +63,37 @@ export function TaskDatePicker({
       startDate: finalStart ?? null,
       dueDate: finalDue ?? null,
     });
+    onSaved?.(finalStart ?? null, finalDue ?? null);
     setOpen(false);
   };
 
-  const hasDate = (startEnabled && start) || (dueEnabled && due);
+  const dateSummary = (
+    <span className="flex items-center gap-1.5">
+      {startEnabled && start ? format(start, "d MMM", { locale: es }) : ""}
+      {startEnabled && start && dueEnabled && due ? " → " : ""}
+      {dueEnabled && due
+        ? format(buildDueWithTime(due)!, "d MMM yyyy HH:mm", { locale: es })
+        : ""}
+    </span>
+  );
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger render={<Button variant="outline">
-        
-          <CalendarDays size={15} />
-          {hasDate ? (
-            <span>
-              {startEnabled && start
-                ? format(start, "d MMM", { locale: es })
-                : ""}
-              {startEnabled && start && dueEnabled && due ? " → " : ""}
-              {dueEnabled && due
-                ? format(buildDueWithTime(due)!, "d MMM yyyy HH:mm", {
-                    locale: es,
-                  })
-                : ""}
-            </span>
-          ) : (
+      {hideTrigger ? (
+        <PopoverTrigger render={
+          <button className="flex items-center gap-1.5 text-md text-muted-foreground hover:text-foreground transition-colors px-1 py-0.5 rounded-md hover:bg-muted">
+            <CalendarDays size={15} />
+            {dateSummary}
+          </button>
+        } />
+      ) : (
+        <PopoverTrigger render={
+          <Button variant="outline">
+            <CalendarDays size={15} />
             <span>Fechas</span>
-          )}
-        </Button>
-      }
-      />
+          </Button>
+        } />
+      )}
 
       <PopoverContent className="flex flex-col gap-4 rounded-xl border bg-popover p-4 shadow-md w-fit">
         {/* Tabs */}

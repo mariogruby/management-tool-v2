@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { Tag, Pencil, Trash2, Check } from "lucide-react";
+
 import type { LabelModel } from "@/lib/generated/prisma/models/Label";
-import { useBoardStore } from "../../store/useBoardStore";
 import { TaskLabelsProps } from "./TaskLabels.types";
 import {
   Popover,
@@ -28,8 +28,6 @@ const PRESET_COLORS = [
 ];
 
 export function TaskLabels({ taskId, boardId, activeLabels }: TaskLabelsProps) {
-  const updateTask = useBoardStore((s) => s.updateTask);
-
   const [open, setOpen] = useState(false);
   const [labels, setLabels] = useState<LabelModel[]>([]);
   const [activeIds, setActiveIds] = useState<Set<string>>(
@@ -50,24 +48,18 @@ export function TaskLabels({ taskId, boardId, activeLabels }: TaskLabelsProps) {
   }, [open, boardId]);
 
   const toggleLabel = async (labelId: string) => {
-    const res = await fetch(`/api/tasks/${taskId}/labels`, {
+    // Optimistic update
+    setActiveIds((prev) => {
+      const next = new Set(prev);
+      next.has(labelId) ? next.delete(labelId) : next.add(labelId);
+      return next;
+    });
+
+    await fetch(`/api/tasks/${taskId}/labels`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ labelId }),
     });
-    const { active } = await res.json();
-    setActiveIds((prev) => {
-      const next = new Set(prev);
-      active ? next.add(labelId) : next.delete(labelId);
-      return next;
-    });
-    // Sync store
-    const label = labels.find((l) => l.id === labelId)!;
-    updateTask("", taskId, {
-      labels: active
-        ? [...activeLabels, { label }]
-        : activeLabels.filter((l) => l.label.id !== labelId),
-    } as never);
   };
 
   const openCreate = () => {
@@ -151,21 +143,25 @@ export function TaskLabels({ taskId, boardId, activeLabels }: TaskLabelsProps) {
             <div className="flex flex-col gap-1">
               {labels.map((label) => (
                 <div key={label.id} className="flex items-center gap-2">
-                  <Checkbox onClick={() => toggleLabel(label.id)}>
-                    {activeIds.has(label.id) && (
-                      <Check size={14} className="text-primary shrink-0" />
-                    )}
-                  </Checkbox>
-                  <Button
+                  <button
                     onClick={() => toggleLabel(label.id)}
-                    className="h-8 flex-1 rounded-sm text-xs text-white px-2 flex items-center font-medium"
-                    style={{ backgroundColor: label.color }}
+                    className="flex items-center gap-2 flex-1 min-w-0"
                   >
-                    {label.title}
-                  </Button>
+                    <Checkbox
+                      checked={activeIds.has(label.id)}
+                      readOnly
+                      className="shrink-0 pointer-events-none"
+                    />
+                    <span
+                      className="h-8 flex-1 rounded-sm text-xs text-white px-2 flex items-center font-medium truncate"
+                      style={{ backgroundColor: label.color }}
+                    >
+                      {label.title}
+                    </span>
+                  </button>
                   <button
                     onClick={() => openEdit(label)}
-                    className="p-1 rounded-md text-muted-foreground hover:bg-muted transition-colors"
+                    className="p-1 rounded-md text-muted-foreground hover:bg-muted transition-colors shrink-0"
                   >
                     <Pencil size={13} />
                   </button>
