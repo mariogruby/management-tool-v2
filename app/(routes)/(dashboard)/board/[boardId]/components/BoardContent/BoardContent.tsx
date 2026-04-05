@@ -122,7 +122,7 @@ export function BoardContent({
       >
         <div className="flex gap-4 overflow-x-auto pb-4 items-start">
           {lists.map((list) => (
-            <ListItem key={list.id} list={list} />
+            <ListItem key={list.id} list={list} boardId={boardId} />
           ))}
           <CreateListForm boardId={boardId} />
         </div>

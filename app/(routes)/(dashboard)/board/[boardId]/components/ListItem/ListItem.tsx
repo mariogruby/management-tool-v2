@@ -7,7 +7,7 @@ import { TaskCard } from "../TaskCard/TaskCard";
 import { CreateTaskForm } from "../CreateTaskForm/CreateTaskForm";
 import { ListHeader } from "../ListHeader/ListHeader";
 
-export function ListItem({ list }: ListItemProps) {
+export function ListItem({ list, boardId }: ListItemProps) {
   const {
     attributes,
     listeners,
@@ -45,7 +45,7 @@ export function ListItem({ list }: ListItemProps) {
       >
         <div className="flex flex-col gap-2">
           {list.tasks.map((task) => (
-            <TaskCard key={task.id} task={task} listId={list.id} listTitle={list.title} />
+            <TaskCard key={task.id} task={task} listId={list.id} listTitle={list.title} boardId={boardId} />
           ))}
         </div>
       </SortableContext>

@@ -1,7 +1,6 @@
 import { create } from "zustand";
 import { arrayMove } from "@dnd-kit/sortable";
-import type { TaskModel } from "@/lib/generated/prisma/models/Task";
-import type { ListWithTasks } from "../components/TaskCard/TaskCard.types";
+import type { TaskWithLabels, ListWithTasks } from "../components/TaskCard/TaskCard.types";
 
 interface BoardState {
   lists: ListWithTasks[];
@@ -11,11 +10,11 @@ interface BoardState {
 
   // Crear
   addList: (list: ListWithTasks) => void;
-  addTask: (listId: string, task: TaskModel) => void;
+  addTask: (listId: string, task: TaskWithLabels) => void;
 
   // Editar
   renameList: (listId: string, title: string) => void;
-  updateTask: (listId: string, taskId: string, data: Partial<TaskModel>) => void;
+  updateTask: (listId: string, taskId: string, data: Partial<TaskWithLabels>) => void;
 
   // Eliminar
   removeList: (listId: string) => void;

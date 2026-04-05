@@ -10,7 +10,7 @@ import { TaskActions } from "../TaskActions/TaskActions";
 import { TaskModal } from "../TaskModal/TaskModal";
 import { useBoardStore } from "../../store/useBoardStore";
 
-export function TaskCard({ task, listId, listTitle }: TaskCardProps) {
+export function TaskCard({ task, listId, listTitle, boardId }: TaskCardProps) {
   const updateTask = useBoardStore((s) => s.updateTask);
   const [modalOpen, setModalOpen] = useState(false);
   const [completed, setCompleted] = useState(task.completed);
@@ -76,6 +76,7 @@ export function TaskCard({ task, listId, listTitle }: TaskCardProps) {
         task={task}
         listId={listId}
         listTitle={listTitle}
+        boardId={boardId}
         open={modalOpen}
         onClose={() => setModalOpen(false)}
       />

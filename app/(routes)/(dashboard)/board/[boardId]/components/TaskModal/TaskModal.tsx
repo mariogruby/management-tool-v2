@@ -11,9 +11,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { useBoardStore } from "../../store/useBoardStore";
 import { TaskDatePicker } from "../TaskDatePicker/TaskDatePicker";
+import { TaskLabels } from "../TaskLabels/TaskLabels";
 import { TaskModalProps } from "./TaskModal.types";
 
-export function TaskModal({ task, listId, listTitle, open, onClose }: TaskModalProps) {
+export function TaskModal({ task, listId, listTitle, boardId, open, onClose }: TaskModalProps) {
   const updateTask = useBoardStore((s) => s.updateTask);
 
   const [title, setTitle] = useState(task.title);
@@ -112,6 +113,12 @@ export function TaskModal({ task, listId, listTitle, open, onClose }: TaskModalP
               </h2>
             )}
           </div>
+
+          <TaskLabels
+            taskId={task.id}
+            boardId={boardId}
+            activeLabels={task.labels}
+          />
 
           <TaskDatePicker
             taskId={task.id}

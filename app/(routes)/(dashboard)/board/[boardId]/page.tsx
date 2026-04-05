@@ -20,7 +20,17 @@ export default async function BoardPage({ params }: BoardPageProps) {
 
   const board = await db.board.findUnique({
     where: { id: boardId, userId: user.id },
-    include: { list: { orderBy: { order: "asc" }, include: { tasks: { orderBy: { order: "asc" } } } } },
+    include: {
+      list: {
+        orderBy: { order: "asc" },
+        include: {
+          tasks: {
+            orderBy: { order: "asc" },
+            include: { labels: { include: { label: true } } },
+          },
+        },
+      },
+    },
   });
 
   if (!board) redirect("/dashboard");
