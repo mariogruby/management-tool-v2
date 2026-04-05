@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useBoardStore } from "../../store/useBoardStore";
+import { TaskDatePicker } from "../TaskDatePicker/TaskDatePicker";
 import { TaskModalProps } from "./TaskModal.types";
 
 export function TaskModal({ task, listId, listTitle, open, onClose }: TaskModalProps) {
@@ -111,6 +112,13 @@ export function TaskModal({ task, listId, listTitle, open, onClose }: TaskModalP
               </h2>
             )}
           </div>
+
+          <TaskDatePicker
+            taskId={task.id}
+            listId={listId}
+            startDate={task.startDate ?? null}
+            dueDate={task.dueDate ?? null}
+          />
 
           <div className="flex flex-col gap-2">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">

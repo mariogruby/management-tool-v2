@@ -13,7 +13,7 @@ export async function PATCH(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { title, description, completed } = await req.json();
+  const { title, description, completed, startDate, dueDate } = await req.json();
 
   if (title !== undefined && (typeof title !== "string" || !title.trim())) {
     return NextResponse.json({ error: "Title is required" }, { status: 400 });
@@ -40,6 +40,8 @@ export async function PATCH(
       ...(title !== undefined && { title: title.trim() }),
       ...(description !== undefined && { description: description.trim() || null }),
       ...(completed !== undefined && { completed }),
+      ...(startDate !== undefined && { startDate: startDate ? new Date(startDate) : null }),
+      ...(dueDate !== undefined && { dueDate: dueDate ? new Date(dueDate) : null }),
     },
   });
 
