@@ -17,7 +17,8 @@ model User {
   clerkId String  @unique
   email   String  @unique
   name    String?
-  boards  Board[]
+  boards   Board[]
+  comments Comment[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -70,12 +71,29 @@ model Task {
   listId String
   list   List   @relation(fields: [listId], references: [id], onDelete: Cascade)
 
-  labels TaskLabel[]
+  labels   TaskLabel[]
+  comments Comment[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([listId])
+}
+
+model Comment {
+  id      String @id @default(cuid())
+  content String
+
+  taskId String
+  task   Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([taskId])
 }
 
 model Label {
