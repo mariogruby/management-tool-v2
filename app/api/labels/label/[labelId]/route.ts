@@ -1,15 +1,14 @@
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import db from "@/lib/db";
+import { hasBoardAccess } from "@/lib/boardAccess";
 
-// PATCH — editar label
 export async function PATCH(
   req: Request,
   { params }: { params: Promise<{ labelId: string }> }
 ) {
   const { labelId } = await params;
   const { userId } = await auth();
-
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { title, color } = await req.json();
@@ -21,10 +20,10 @@ export async function PATCH(
     where: { id: labelId },
     include: { board: true },
   });
+  if (!label) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-  if (!label || label.board.userId !== user.id) {
-    return NextResponse.json({ error: "Not found" }, { status: 404 });
-  }
+  const allowed = await hasBoardAccess(user.id, label.board.id);
+  if (!allowed) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   const updated = await db.label.update({
     where: { id: labelId },
@@ -37,14 +36,12 @@ export async function PATCH(
   return NextResponse.json(updated);
 }
 
-// DELETE — eliminar label
 export async function DELETE(
   _req: Request,
   { params }: { params: Promise<{ labelId: string }> }
 ) {
   const { labelId } = await params;
   const { userId } = await auth();
-
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const user = await db.user.findUnique({ where: { clerkId: userId } });
@@ -54,10 +51,10 @@ export async function DELETE(
     where: { id: labelId },
     include: { board: true },
   });
+  if (!label) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-  if (!label || label.board.userId !== user.id) {
-    return NextResponse.json({ error: "Not found" }, { status: 404 });
-  }
+  const allowed = await hasBoardAccess(user.id, label.board.id);
+  if (!allowed) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   await db.label.delete({ where: { id: labelId } });
 

@@ -2,6 +2,7 @@ import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { del } from "@vercel/blob";
 import db from "@/lib/db";
+import { hasBoardAccess } from "@/lib/boardAccess";
 
 export async function DELETE(
   _req: Request,
@@ -19,9 +20,12 @@ export async function DELETE(
     include: { task: { include: { list: { include: { board: true } } } } },
   });
 
-  if (!attachment || attachment.taskId !== taskId || attachment.task.list.board.userId !== user.id) {
+  if (!attachment || attachment.taskId !== taskId) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
+
+  const allowed = await hasBoardAccess(user.id, attachment.task.list.board.id);
+  if (!allowed) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   await del(attachment.url);
   await db.attachment.delete({ where: { id: attachmentId } });

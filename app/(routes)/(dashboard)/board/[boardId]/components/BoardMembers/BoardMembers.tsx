@@ -31,6 +31,7 @@ type Props = {
 export function BoardMembers({ boardId, open, onClose }: Props) {
   const [members, setMembers] = useState<Member[]>([]);
   const [invitations, setInvitations] = useState<Invitation[]>([]);
+  const [isOwner, setIsOwner] = useState(false);
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -40,9 +41,10 @@ export function BoardMembers({ boardId, open, onClose }: Props) {
     if (!open) return;
     fetch(`/api/boards/${boardId}/invitations`)
       .then((r) => r.json())
-      .then(({ members, invitations }) => {
-        setMembers(members);
-        setInvitations(invitations);
+      .then((data) => {
+        setMembers(data.members ?? []);
+        setInvitations(data.invitations ?? []);
+        setIsOwner(data.isOwner ?? false);
       });
   }, [open, boardId]);
 
@@ -95,8 +97,8 @@ export function BoardMembers({ boardId, open, onClose }: Props) {
         </DialogHeader>
 
         <div className="flex flex-col gap-5">
-          {/* Invite form */}
-          <div className="flex flex-col gap-2">
+          {/* Invite form — owner only */}
+          {isOwner && <div className="flex flex-col gap-2">
             <p className="text-sm font-medium">Invitar por email</p>
             <div className="flex gap-2">
               <input
@@ -113,7 +115,7 @@ export function BoardMembers({ boardId, open, onClose }: Props) {
             </div>
             {error && <p className="text-xs text-destructive">{error}</p>}
             {success && <p className="text-xs text-green-600">Invitación enviada</p>}
-          </div>
+          </div>}
 
           {/* Members */}
           {members.length > 0 && (
@@ -130,12 +132,14 @@ export function BoardMembers({ boardId, open, onClose }: Props) {
                       <p className="text-xs text-muted-foreground truncate">{member.user.email}</p>
                     )}
                   </div>
-                  <button
-                    onClick={() => removeMember(member.id)}
-                    className="shrink-0 opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-all"
-                  >
-                    <Trash2 size={13} />
-                  </button>
+                  {isOwner && (
+                    <button
+                      onClick={() => removeMember(member.id)}
+                      className="shrink-0 opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-all"
+                    >
+                      <Trash2 size={13} />
+                    </button>
+                  )}
                 </div>
               ))}
             </div>

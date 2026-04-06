@@ -2,6 +2,7 @@ import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import db from "@/lib/db";
+import { hasBoardAccess } from "@/lib/boardAccess";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -16,10 +17,11 @@ export async function GET(
   const user = await db.user.findUnique({ where: { clerkId: userId } });
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
+  const allowed = await hasBoardAccess(user.id, boardId);
+  if (!allowed) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
   const board = await db.board.findUnique({ where: { id: boardId } });
-  if (!board || board.userId !== user.id) {
-    return NextResponse.json({ error: "Not found" }, { status: 404 });
-  }
+  const isOwner = board?.userId === user.id;
 
   const [members, invitations] = await Promise.all([
     db.boardMember.findMany({
@@ -27,13 +29,15 @@ export async function GET(
       include: { user: { select: { name: true, email: true } } },
       orderBy: { createdAt: "asc" },
     }),
-    db.invitation.findMany({
-      where: { boardId, status: "pending" },
-      orderBy: { createdAt: "desc" },
-    }),
+    isOwner
+      ? db.invitation.findMany({
+          where: { boardId, status: "pending" },
+          orderBy: { createdAt: "desc" },
+        })
+      : Promise.resolve([]),
   ]);
 
-  return NextResponse.json({ members, invitations });
+  return NextResponse.json({ members, invitations, isOwner });
 }
 
 export async function POST(
@@ -59,10 +63,7 @@ export async function POST(
 
   const normalizedEmail = email.trim().toLowerCase();
 
-  // Check if already a member
-  const existingMember = await db.user.findUnique({
-    where: { email: normalizedEmail },
-  });
+  const existingMember = await db.user.findUnique({ where: { email: normalizedEmail } });
   if (existingMember) {
     const alreadyMember = await db.boardMember.findUnique({
       where: { boardId_userId: { boardId, userId: existingMember.id } },
@@ -72,7 +73,6 @@ export async function POST(
     }
   }
 
-  // Check for existing pending invitation
   const existing = await db.invitation.findFirst({
     where: { boardId, email: normalizedEmail, status: "pending" },
   });
@@ -80,7 +80,7 @@ export async function POST(
     return NextResponse.json({ error: "Already invited" }, { status: 409 });
   }
 
-  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
+  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
   const invitation = await db.invitation.create({
     data: { email: normalizedEmail, boardId, expiresAt },
   });

@@ -1,15 +1,14 @@
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import db from "@/lib/db";
+import { hasBoardAccess } from "@/lib/boardAccess";
 
-// POST — toggle label on task
 export async function POST(
   req: Request,
   { params }: { params: Promise<{ taskId: string }> }
 ) {
   const { taskId } = await params;
   const { userId } = await auth();
-
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { labelId } = await req.json();
@@ -21,10 +20,10 @@ export async function POST(
     where: { id: taskId },
     include: { list: { include: { board: true } } },
   });
+  if (!task) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-  if (!task || task.list.board.userId !== user.id) {
-    return NextResponse.json({ error: "Not found" }, { status: 404 });
-  }
+  const allowed = await hasBoardAccess(user.id, task.list.board.id);
+  if (!allowed) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   const existing = await db.taskLabel.findUnique({
     where: { taskId_labelId: { taskId, labelId } },
