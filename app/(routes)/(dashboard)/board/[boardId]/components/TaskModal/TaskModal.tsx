@@ -15,6 +15,7 @@ import { TaskDatePicker } from "../TaskDatePicker/TaskDatePicker";
 import { TaskLabels } from "../TaskLabels/TaskLabels";
 import { TaskComments } from "../TaskComments/TaskComments";
 import { TaskAttachments, type TaskAttachmentsHandle } from "../TaskAttachments/TaskAttachments";
+import { TaskDescriptionEditor } from "../TaskDescriptionEditor/TaskDescriptionEditor";
 import type { LabelModel } from "@/lib/generated/prisma/models/Label";
 import { TaskModalProps } from "./TaskModal.types";
 
@@ -31,7 +32,6 @@ export function TaskModal({
 
   const [title, setTitle] = useState(task.title);
   const [savedTitle, setSavedTitle] = useState(task.title);
-  const [description, setDescription] = useState(task.description ?? "");
   const [savedDescription, setSavedDescription] = useState(
     task.description ?? "",
   );
@@ -77,9 +77,8 @@ export function TaskModal({
     setLoading(false);
   };
 
-  const saveDescription = async () => {
-    const trimmed = description.trim();
-    if (trimmed === savedDescription) {
+  const saveDescription = async (html: string) => {
+    if (html === savedDescription) {
       setEditingDescription(false);
       return;
     }
@@ -87,10 +86,10 @@ export function TaskModal({
     await fetch(`/api/tasks/updateTask/${task.id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ description: trimmed }),
+      body: JSON.stringify({ description: html }),
     });
-    updateTask(listId, task.id, { description: trimmed || null });
-    setSavedDescription(trimmed);
+    updateTask(listId, task.id, { description: html || null });
+    setSavedDescription(html);
     setEditingDescription(false);
     setLoading(false);
   };
@@ -224,52 +223,24 @@ export function TaskModal({
               </div>
 
               {editingDescription ? (
-                <div className="flex flex-col gap-2">
-                  <textarea
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Escape") {
-                        setDescription(savedDescription);
-                        setEditingDescription(false);
-                      }
-                    }}
-                    disabled={loading}
-                    placeholder="Añade una descripción..."
-                    rows={4}
-                    autoFocus
-                    className="w-full resize-none rounded-md border bg-transparent px-3 py-2 text-sm outline-none focus:ring-1 focus:ring-ring placeholder:text-muted-foreground"
-                  />
-                  <div className="flex gap-2">
-                    <Button
-                      size="sm"
-                      onClick={saveDescription}
-                      disabled={loading}
-                    >
-                      Guardar
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => {
-                        setDescription(savedDescription);
-                        setEditingDescription(false);
-                      }}
-                      disabled={loading}
-                    >
-                      Cancelar
-                    </Button>
-                  </div>
-                </div>
+                <TaskDescriptionEditor
+                  content={savedDescription}
+                  loading={loading}
+                  onSave={(html) => saveDescription(html)}
+                  onCancel={() => setEditingDescription(false)}
+                />
               ) : (
                 <div
                   onClick={() => setEditingDescription(true)}
                   className="min-h-16 w-full rounded-md px-3 py-2 text-sm cursor-pointer hover:bg-muted transition-colors"
                 >
-                  {savedDescription || (
-                    <span className="text-muted-foreground">
-                      Añade una descripción...
-                    </span>
+                  {savedDescription ? (
+                    <div
+                      className="prose prose-sm dark:prose-invert max-w-none"
+                      dangerouslySetInnerHTML={{ __html: savedDescription }}
+                    />
+                  ) : (
+                    <span className="text-muted-foreground">Añade una descripción...</span>
                   )}
                 </div>
               )}
