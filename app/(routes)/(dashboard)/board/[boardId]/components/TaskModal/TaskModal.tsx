@@ -8,23 +8,41 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useBoardStore } from "../../store/useBoardStore";
 import { TaskDatePicker } from "../TaskDatePicker/TaskDatePicker";
 import { TaskLabels } from "../TaskLabels/TaskLabels";
 import { TaskComments } from "../TaskComments/TaskComments";
+import type { LabelModel } from "@/lib/generated/prisma/models/Label";
 import { TaskModalProps } from "./TaskModal.types";
 
-export function TaskModal({ task, listId, listTitle, boardId, open, onClose }: TaskModalProps) {
+export function TaskModal({
+  task,
+  listId,
+  listTitle,
+  boardId,
+  open,
+  onClose,
+}: TaskModalProps) {
   const updateTask = useBoardStore((s) => s.updateTask);
 
   const [title, setTitle] = useState(task.title);
   const [savedTitle, setSavedTitle] = useState(task.title);
   const [description, setDescription] = useState(task.description ?? "");
-  const [savedDescription, setSavedDescription] = useState(task.description ?? "");
+  const [savedDescription, setSavedDescription] = useState(
+    task.description ?? "",
+  );
   const [completed, setCompleted] = useState(task.completed);
-  const [currentStartDate, setCurrentStartDate] = useState<Date | null>(task.startDate ?? null);
-  const [currentDueDate, setCurrentDueDate] = useState<Date | null>(task.dueDate ?? null);
+  const [currentStartDate, setCurrentStartDate] = useState<Date | null>(
+    task.startDate ?? null,
+  );
+  const [currentDueDate, setCurrentDueDate] = useState<Date | null>(
+    task.dueDate ?? null,
+  );
+  const [activeLabels, setActiveLabels] = useState<{ label: LabelModel }[]>(
+    task.labels,
+  );
   const [editingTitle, setEditingTitle] = useState(false);
   const [editingDescription, setEditingDescription] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -84,7 +102,10 @@ export function TaskModal({ task, listId, listTitle, boardId, open, onClose }: T
           </DialogTitle>
         </DialogHeader>
 
-        <div className="flex divide-x overflow-hidden" style={{ maxHeight: "70vh" }}>
+        <div
+          className="flex divide-x overflow-hidden"
+          style={{ maxHeight: "70vh" }}
+        >
           {/* Left — task details */}
           <div className="flex-1 overflow-y-auto px-4 pt-2 pb-6 flex flex-col gap-4">
             <div className="flex items-start gap-2">
@@ -92,17 +113,31 @@ export function TaskModal({ task, listId, listTitle, boardId, open, onClose }: T
                 onClick={toggleCompleted}
                 className="mt-4 shrink-0 text-muted-foreground hover:text-primary transition-colors"
               >
-                {completed ? <CheckCircle2 size={20} className="text-primary" /> : <Circle size={20} />}
+                {completed ? (
+                  <CheckCircle2 size={20} className="text-primary" />
+                ) : (
+                  <Circle size={20} />
+                )}
               </button>
 
               {editingTitle ? (
                 <textarea
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  onBlur={() => { saveTitle(); setEditingTitle(false); }}
+                  onBlur={() => {
+                    saveTitle();
+                    setEditingTitle(false);
+                  }}
                   onKeyDown={(e) => {
-                    if (e.key === "Enter") { e.preventDefault(); saveTitle(); setEditingTitle(false); }
-                    if (e.key === "Escape") { setTitle(savedTitle); setEditingTitle(false); }
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      saveTitle();
+                      setEditingTitle(false);
+                    }
+                    if (e.key === "Escape") {
+                      setTitle(savedTitle);
+                      setEditingTitle(false);
+                    }
                   }}
                   disabled={loading}
                   autoFocus
@@ -126,6 +161,7 @@ export function TaskModal({ task, listId, listTitle, boardId, open, onClose }: T
                   taskId={task.id}
                   boardId={boardId}
                   activeLabels={task.labels}
+                  onLabelsChange={setActiveLabels}
                 />
                 {!currentStartDate && !currentDueDate && (
                   <TaskDatePicker
@@ -133,10 +169,27 @@ export function TaskModal({ task, listId, listTitle, boardId, open, onClose }: T
                     listId={listId}
                     startDate={currentStartDate}
                     dueDate={currentDueDate}
-                    onSaved={(s, d) => { setCurrentStartDate(s); setCurrentDueDate(d); }}
+                    onSaved={(s, d) => {
+                      setCurrentStartDate(s);
+                      setCurrentDueDate(d);
+                    }}
                   />
                 )}
               </div>
+
+              {activeLabels.length > 0 && (
+                <div className="flex flex-wrap gap-1">
+                  {activeLabels.map(({ label }) => (
+                    <Badge
+                      key={label.id}
+                      className="text-white font-medium"
+                      style={{ backgroundColor: label.color }}
+                    >
+                      {label.title}
+                    </Badge>
+                  ))}
+                </div>
+              )}
 
               {(currentStartDate || currentDueDate) && (
                 <TaskDatePicker
@@ -145,7 +198,10 @@ export function TaskModal({ task, listId, listTitle, boardId, open, onClose }: T
                   startDate={currentStartDate}
                   dueDate={currentDueDate}
                   hideTrigger
-                  onSaved={(s, d) => { setCurrentStartDate(s); setCurrentDueDate(d); }}
+                  onSaved={(s, d) => {
+                    setCurrentStartDate(s);
+                    setCurrentDueDate(d);
+                  }}
                 />
               )}
             </div>
@@ -174,13 +230,20 @@ export function TaskModal({ task, listId, listTitle, boardId, open, onClose }: T
                     className="w-full resize-none rounded-md border bg-transparent px-3 py-2 text-sm outline-none focus:ring-1 focus:ring-ring placeholder:text-muted-foreground"
                   />
                   <div className="flex gap-2">
-                    <Button size="sm" onClick={saveDescription} disabled={loading}>
+                    <Button
+                      size="sm"
+                      onClick={saveDescription}
+                      disabled={loading}
+                    >
                       Guardar
                     </Button>
                     <Button
                       size="sm"
                       variant="ghost"
-                      onClick={() => { setDescription(savedDescription); setEditingDescription(false); }}
+                      onClick={() => {
+                        setDescription(savedDescription);
+                        setEditingDescription(false);
+                      }}
                       disabled={loading}
                     >
                       Cancelar
@@ -193,7 +256,9 @@ export function TaskModal({ task, listId, listTitle, boardId, open, onClose }: T
                   className="min-h-16 w-full rounded-md px-3 py-2 text-sm cursor-pointer hover:bg-muted transition-colors"
                 >
                   {savedDescription || (
-                    <span className="text-muted-foreground">Añade una descripción...</span>
+                    <span className="text-muted-foreground">
+                      Añade una descripción...
+                    </span>
                   )}
                 </div>
               )}

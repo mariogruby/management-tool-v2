@@ -27,7 +27,7 @@ const PRESET_COLORS = [
   "#14b8a6",
 ];
 
-export function TaskLabels({ taskId, boardId, activeLabels }: TaskLabelsProps) {
+export function TaskLabels({ taskId, boardId, activeLabels, onLabelsChange }: TaskLabelsProps) {
   const [open, setOpen] = useState(false);
   const [labels, setLabels] = useState<LabelModel[]>([]);
   const [activeIds, setActiveIds] = useState<Set<string>>(
@@ -48,12 +48,15 @@ export function TaskLabels({ taskId, boardId, activeLabels }: TaskLabelsProps) {
   }, [open, boardId]);
 
   const toggleLabel = async (labelId: string) => {
-    // Optimistic update
-    setActiveIds((prev) => {
-      const next = new Set(prev);
-      next.has(labelId) ? next.delete(labelId) : next.add(labelId);
-      return next;
-    });
+    const next = new Set(activeIds);
+    next.has(labelId) ? next.delete(labelId) : next.add(labelId);
+    setActiveIds(next);
+    if (onLabelsChange) {
+      const nextActive = labels
+        .filter((l) => next.has(l.id))
+        .map((l) => ({ label: l }));
+      onLabelsChange(nextActive);
+    }
 
     await fetch(`/api/tasks/${taskId}/labels`, {
       method: "POST",
@@ -114,7 +117,7 @@ export function TaskLabels({ taskId, boardId, activeLabels }: TaskLabelsProps) {
           <Button variant="outline">
             <Tag size={15} />
             <span>Etiquetas</span>
-            {activeIds.size > 0 && (
+            {/* {activeIds.size > 0 && (
               <div className="flex gap-1">
                 {labels
                   .filter((l) => activeIds.has(l.id))
@@ -128,7 +131,7 @@ export function TaskLabels({ taskId, boardId, activeLabels }: TaskLabelsProps) {
                     </span>
                   ))}
               </div>
-            )}
+            )} */}
           </Button>
         }
       />
