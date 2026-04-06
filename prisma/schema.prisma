@@ -71,8 +71,9 @@ model Task {
   listId String
   list   List   @relation(fields: [listId], references: [id], onDelete: Cascade)
 
-  labels   TaskLabel[]
-  comments Comment[]
+  labels      TaskLabel[]
+  comments    Comment[]
+  attachments Attachment[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -120,4 +121,18 @@ model TaskLabel {
   label Label @relation(fields: [labelId], references: [id], onDelete: Cascade)
 
   @@id([taskId, labelId])
+}
+
+model Attachment {
+  id       String @id @default(cuid())
+  filename String
+  url      String
+  size     Int
+
+  taskId String
+  task   Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([taskId])
 }

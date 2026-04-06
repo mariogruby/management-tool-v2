@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { AlignLeft, CheckCircle2, Circle } from "lucide-react";
+import { useRef, useState } from "react";
+import { AlignLeft, CheckCircle2, Circle, Paperclip } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -14,6 +14,7 @@ import { useBoardStore } from "../../store/useBoardStore";
 import { TaskDatePicker } from "../TaskDatePicker/TaskDatePicker";
 import { TaskLabels } from "../TaskLabels/TaskLabels";
 import { TaskComments } from "../TaskComments/TaskComments";
+import { TaskAttachments, type TaskAttachmentsHandle } from "../TaskAttachments/TaskAttachments";
 import type { LabelModel } from "@/lib/generated/prisma/models/Label";
 import { TaskModalProps } from "./TaskModal.types";
 
@@ -26,6 +27,7 @@ export function TaskModal({
   onClose,
 }: TaskModalProps) {
   const updateTask = useBoardStore((s) => s.updateTask);
+  const attachmentsRef = useRef<TaskAttachmentsHandle>(null);
 
   const [title, setTitle] = useState(task.title);
   const [savedTitle, setSavedTitle] = useState(task.title);
@@ -154,9 +156,9 @@ export function TaskModal({
               )}
             </div>
 
-            {/* Labels + Dates row */}
+            {/* Labels + Dates + Attachments row */}
             <div className="flex flex-col gap-2">
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-wrap">
                 <TaskLabels
                   taskId={task.id}
                   boardId={boardId}
@@ -175,6 +177,13 @@ export function TaskModal({
                     }}
                   />
                 )}
+                <Button
+                  variant="outline"
+                  onClick={() => attachmentsRef.current?.openFilePicker()}
+                >
+                  <Paperclip size={15} />
+                  <span>Adjuntar</span>
+                </Button>
               </div>
 
               {activeLabels.length > 0 && (
@@ -204,6 +213,8 @@ export function TaskModal({
                   }}
                 />
               )}
+
+              <TaskAttachments ref={attachmentsRef} taskId={task.id} />
             </div>
 
             <div className="flex flex-col gap-2">
@@ -263,6 +274,7 @@ export function TaskModal({
                 </div>
               )}
             </div>
+
           </div>
 
           {/* Right — comments */}
