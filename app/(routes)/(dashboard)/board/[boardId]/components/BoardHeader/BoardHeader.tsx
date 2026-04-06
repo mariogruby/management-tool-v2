@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { MoreHorizontal, Trash2, Pencil } from "lucide-react";
+import { MoreHorizontal, Trash2, Pencil, Users } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,9 +9,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { useBoardsStore } from "@/store/useBoardsStore";
 import { useRouter } from "next/navigation";
 import { BoardHeaderProps } from "./BoardHeader.types";
+import { BoardMembers } from "../BoardMembers/BoardMembers";
 
 export function BoardHeader({ boardId, title }: BoardHeaderProps) {
   const router = useRouter();
@@ -22,6 +24,7 @@ export function BoardHeader({ boardId, title }: BoardHeaderProps) {
   const [value, setValue] = useState(title);
   const [savedTitle, setSavedTitle] = useState(title);
   const [loading, setLoading] = useState(false);
+  const [membersOpen, setMembersOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const startEditing = () => {
@@ -61,52 +64,72 @@ export function BoardHeader({ boardId, title }: BoardHeaderProps) {
   };
 
   return (
-    <div className="flex items-center justify-between gap-4">
-      {isEditing ? (
-        <Input
-          ref={inputRef}
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-          onBlur={save}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") save();
-            if (e.key === "Escape") cancelEditing();
-          }}
-          disabled={loading}
-          className="text-2xl font-bold w-auto rounded-xl"
-          autoFocus
-        />
-      ) : (
-        <h1
-          className="text-2xl font-bold cursor-pointer hover:opacity-75 transition-opacity"
-          onClick={startEditing}
-        >
-          {value}
-        </h1>
-      )}
+    <>
+      <BoardMembers
+        boardId={boardId}
+        open={membersOpen}
+        onClose={() => setMembersOpen(false)}
+      />
 
-      <DropdownMenu>
-        <DropdownMenuTrigger
-          className="p-1.5 rounded-md text-muted-foreground hover:bg-muted transition"
-          disabled={loading}
-        >
-          <MoreHorizontal size={18} />
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={startEditing} className="cursor-pointer">
-            <Pencil size={14} />
-            Renombrar board
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            variant="destructive"
-            onClick={handleDelete}
+      <div className="flex items-center justify-between gap-4">
+        {isEditing ? (
+          <Input
+            ref={inputRef}
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+            onBlur={save}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") save();
+              if (e.key === "Escape") cancelEditing();
+            }}
+            disabled={loading}
+            className="text-2xl font-bold w-auto rounded-xl"
+            autoFocus
+          />
+        ) : (
+          <h1
+            className="text-2xl font-bold cursor-pointer hover:opacity-75 transition-opacity"
+            onClick={startEditing}
+          >
+            {value}
+          </h1>
+        )}
+
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setMembersOpen(true)}
             disabled={loading}
           >
-            <Trash2 size={14} />
-            Eliminar board
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </div>
+            <Users size={15} />
+            Miembros
+          </Button>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              className="p-1.5 rounded-md text-muted-foreground hover:bg-muted transition"
+              disabled={loading}
+            >
+              <MoreHorizontal size={18} />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={startEditing} className="cursor-pointer">
+                <Pencil size={14} />
+                Renombrar board
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                variant="destructive"
+                onClick={handleDelete}
+                disabled={loading}
+              >
+                <Trash2 size={14} />
+                Eliminar board
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </div>
+    </>
   );
 }

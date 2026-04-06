@@ -17,8 +17,9 @@ model User {
   clerkId String  @unique
   email   String  @unique
   name    String?
-  boards   Board[]
-  comments Comment[]
+  boards        Board[]
+  comments      Comment[]
+  boardMembers  BoardMember[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -33,13 +34,47 @@ model Board {
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  list   List[]
-  labels Label[]
+  list        List[]
+  labels      Label[]
+  members     BoardMember[]
+  invitations Invitation[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([userId])
+}
+
+model BoardMember {
+  id   String @id @default(cuid())
+  role String @default("member")
+
+  boardId String
+  board   Board  @relation(fields: [boardId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([boardId, userId])
+  @@index([boardId])
+}
+
+model Invitation {
+  id        String   @id @default(cuid())
+  email     String
+  token     String   @unique @default(cuid())
+  status    String   @default("pending")
+  expiresAt DateTime
+
+  boardId String
+  board   Board  @relation(fields: [boardId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([boardId])
+  @@index([token])
 }
 
 model List {

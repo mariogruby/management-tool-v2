@@ -16,7 +16,12 @@ export async function GET() {
   }
 
   const boards = await db.board.findMany({
-    where: { userId: user.id },
+    where: {
+      OR: [
+        { userId: user.id },
+        { members: { some: { userId: user.id } } },
+      ],
+    },
     orderBy: { createdAt: "desc" },
   });
 

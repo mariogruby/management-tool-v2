@@ -17,7 +17,12 @@ export default async function LayoutDashboard({
     const user = await db.user.findUnique({ where: { clerkId: userId } });
     if (!user) return [];
     return db.board.findMany({
-      where: { userId: user.id },
+      where: {
+        OR: [
+          { userId: user.id },
+          { members: { some: { userId: user.id } } },
+        ],
+      },
       orderBy: { createdAt: "desc" },
     });
   })();

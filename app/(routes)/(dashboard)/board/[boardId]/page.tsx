@@ -18,8 +18,14 @@ export default async function BoardPage({ params }: BoardPageProps) {
 
   if (!user) redirect("/sign-in");
 
-  const board = await db.board.findUnique({
-    where: { id: boardId, userId: user.id },
+  const board = await db.board.findFirst({
+    where: {
+      id: boardId,
+      OR: [
+        { userId: user.id },
+        { members: { some: { userId: user.id } } },
+      ],
+    },
     include: {
       list: {
         orderBy: { order: "asc" },
