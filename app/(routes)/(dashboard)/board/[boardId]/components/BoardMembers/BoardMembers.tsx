@@ -9,24 +9,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-
-type Member = {
-  id: string;
-  role: string;
-  user: { name: string | null; email: string };
-};
-
-type Invitation = {
-  id: string;
-  email: string;
-  createdAt: string;
-};
-
-type Props = {
-  boardId: string;
-  open: boolean;
-  onClose: () => void;
-};
+import { Member, Invitation, Props } from "./BoardMembers.types";
 
 export function BoardMembers({ boardId, open, onClose }: Props) {
   const [members, setMembers] = useState<Member[]>([]);

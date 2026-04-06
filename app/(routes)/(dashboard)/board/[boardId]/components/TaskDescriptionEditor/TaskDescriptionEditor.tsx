@@ -16,25 +16,21 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-type Props = {
-  content: string;
-  onSave: (html: string) => void;
-  onCancel: () => void;
-  loading?: boolean;
-};
+import { Props, ToolbarButtonProps } from "./TaskDescriptionEditor.types";
 
-type ToolbarButtonProps = {
-  onClick: () => void;
-  active?: boolean;
-  title: string;
-  children: React.ReactNode;
-};
-
-function ToolbarButton({ onClick, active, title, children }: ToolbarButtonProps) {
+function ToolbarButton({
+  onClick,
+  active,
+  title,
+  children,
+}: ToolbarButtonProps) {
   return (
     <button
       type="button"
-      onMouseDown={(e) => { e.preventDefault(); onClick(); }}
+      onMouseDown={(e) => {
+        e.preventDefault();
+        onClick();
+      }}
       title={title}
       className={`p-1.5 rounded-md transition-colors ${
         active
@@ -47,7 +43,12 @@ function ToolbarButton({ onClick, active, title, children }: ToolbarButtonProps)
   );
 }
 
-export function TaskDescriptionEditor({ content, onSave, onCancel, loading }: Props) {
+export function TaskDescriptionEditor({
+  content,
+  onSave,
+  onCancel,
+  loading,
+}: Props) {
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
@@ -94,14 +95,18 @@ export function TaskDescriptionEditor({ content, onSave, onCancel, loading }: Pr
         <div className="w-px h-4 bg-border mx-1" />
 
         <ToolbarButton
-          onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+          onClick={() =>
+            editor.chain().focus().toggleHeading({ level: 2 }).run()
+          }
           active={editor.isActive("heading", { level: 2 })}
           title="Heading 2"
         >
           <Heading2 size={14} />
         </ToolbarButton>
         <ToolbarButton
-          onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
+          onClick={() =>
+            editor.chain().focus().toggleHeading({ level: 3 }).run()
+          }
           active={editor.isActive("heading", { level: 3 })}
           title="Heading 3"
         >
@@ -151,7 +156,11 @@ export function TaskDescriptionEditor({ content, onSave, onCancel, loading }: Pr
 
       {/* Actions */}
       <div className="flex gap-2 px-3 pb-2">
-        <Button size="sm" onClick={() => onSave(editor.getHTML())} disabled={loading}>
+        <Button
+          size="sm"
+          onClick={() => onSave(editor.getHTML())}
+          disabled={loading}
+        >
           Guardar
         </Button>
         <Button size="sm" variant="ghost" onClick={onCancel} disabled={loading}>
