@@ -1,5 +1,5 @@
 import type { LabelModel } from "@/lib/generated/prisma/models/Label";
-import type { TaskWithLabels } from "../TaskCard/TaskCard.types";
+import type { BoardUser, TaskWithLabels } from "../TaskCard/TaskCard.types";
 
 export type TaskModalProps = {
   task: TaskWithLabels;
@@ -8,6 +8,8 @@ export type TaskModalProps = {
   boardId: string;
   open: boolean;
   onClose: () => void;
+  isOwner: boolean;
+  boardUsers: BoardUser[];
 };
 
 export type LabelWithActive = LabelModel & { active: boolean };

@@ -20,6 +20,7 @@ model User {
   boards        Board[]
   comments      Comment[]
   boardMembers  BoardMember[]
+  taskAssignees TaskAssignee[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -109,11 +110,23 @@ model Task {
   labels      TaskLabel[]
   comments    Comment[]
   attachments Attachment[]
+  assignees   TaskAssignee[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([listId])
+}
+
+model TaskAssignee {
+  taskId String
+  userId String
+
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([taskId, userId])
+  @@index([taskId])
 }
 
 model Comment {

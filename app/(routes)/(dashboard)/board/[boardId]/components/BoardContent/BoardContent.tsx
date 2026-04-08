@@ -68,7 +68,7 @@ function taskMatchesFilters(task: TaskWithLabels, filters: BoardFiltersState): b
   return true;
 }
 
-export function BoardContent({ lists: initialLists, boardId }: BoardContentProps) {
+export function BoardContent({ lists: initialLists, boardId, isOwner, boardUsers }: BoardContentProps) {
   const { lists, setLists, reorderLists, moveTask } = useBoardStore();
   const [activeTask, setActiveTask] = useState<TaskModel | null>(null);
   const [activeList, setActiveList] = useState<ListWithTasks | null>(null);
@@ -197,7 +197,7 @@ export function BoardContent({ lists: initialLists, boardId }: BoardContentProps
         >
           <div className="flex gap-4 overflow-x-auto pb-4 items-start">
             {filteredLists.map((list) => (
-              <ListItem key={list.id} list={list} boardId={boardId} />
+              <ListItem key={list.id} list={list} boardId={boardId} isOwner={isOwner} boardUsers={boardUsers} />
             ))}
             <CreateListForm boardId={boardId} />
           </div>

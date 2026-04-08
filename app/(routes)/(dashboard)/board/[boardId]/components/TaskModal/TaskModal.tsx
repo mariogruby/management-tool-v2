@@ -14,9 +14,14 @@ import { useBoardStore } from "../../store/useBoardStore";
 import { TaskDatePicker } from "../TaskDatePicker/TaskDatePicker";
 import { TaskLabels } from "../TaskLabels/TaskLabels";
 import { TaskComments } from "../TaskComments/TaskComments";
-import { TaskAttachments, type TaskAttachmentsHandle } from "../TaskAttachments/TaskAttachments";
+import {
+  TaskAttachments,
+  type TaskAttachmentsHandle,
+} from "../TaskAttachments/TaskAttachments";
 import { TaskDescriptionEditor } from "../TaskDescriptionEditor/TaskDescriptionEditor";
+import { TaskAssignees } from "../TaskAssignees/TaskAssignees";
 import type { LabelModel } from "@/lib/generated/prisma/models/Label";
+import type { TaskAssignee } from "../TaskCard/TaskCard.types";
 import { TaskModalProps } from "./TaskModal.types";
 
 export function TaskModal({
@@ -26,6 +31,8 @@ export function TaskModal({
   boardId,
   open,
   onClose,
+  isOwner,
+  boardUsers,
 }: TaskModalProps) {
   const updateTask = useBoardStore((s) => s.updateTask);
   const attachmentsRef = useRef<TaskAttachmentsHandle>(null);
@@ -44,6 +51,9 @@ export function TaskModal({
   );
   const [activeLabels, setActiveLabels] = useState<{ label: LabelModel }[]>(
     task.labels,
+  );
+  const [activeAssignees, setActiveAssignees] = useState<TaskAssignee[]>(
+    task.assignees,
   );
   const [editingTitle, setEditingTitle] = useState(false);
   const [editingDescription, setEditingDescription] = useState(false);
@@ -183,6 +193,13 @@ export function TaskModal({
                   <Paperclip size={15} />
                   <span>Adjuntar</span>
                 </Button>
+                <TaskAssignees
+                  taskId={task.id}
+                  boardUsers={boardUsers}
+                  activeAssignees={activeAssignees}
+                  isOwner={isOwner}
+                  onAssigneesChange={setActiveAssignees}
+                />
               </div>
 
               {activeLabels.length > 0 && (
@@ -240,12 +257,13 @@ export function TaskModal({
                       dangerouslySetInnerHTML={{ __html: savedDescription }}
                     />
                   ) : (
-                    <span className="text-muted-foreground">Añade una descripción...</span>
+                    <span className="text-muted-foreground">
+                      Añade una descripción...
+                    </span>
                   )}
                 </div>
               )}
             </div>
-
           </div>
 
           {/* Right — comments */}
