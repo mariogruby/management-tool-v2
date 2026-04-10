@@ -1,6 +1,8 @@
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import db from "@/lib/db";
+import { hasBoardAccess } from "@/lib/boardAccess";
+import { createActivity } from "@/lib/createActivity";
 
 export async function POST(req: Request) {
   const { userId } = await auth();
@@ -26,10 +28,15 @@ export async function POST(req: Request) {
   }
 
   const list = await db.list.findFirst({
-    where: { id: listId, board: { userId: user.id } },
+    where: { id: listId },
   });
 
   if (!list) {
+    return NextResponse.json({ error: "List not found" }, { status: 404 });
+  }
+
+  const allowed = await hasBoardAccess(user.id, list.boardId);
+  if (!allowed) {
     return NextResponse.json({ error: "List not found" }, { status: 404 });
   }
 
@@ -44,6 +51,13 @@ export async function POST(req: Request) {
       listId,
       order: lastTask ? lastTask.order + 1 : 0,
     },
+  });
+
+  await createActivity({
+    type: "task_created",
+    message: `${user.name ?? user.email} creó la tarea "${task.title}" en "${list.title}"`,
+    boardId: list.boardId,
+    userId: user.id,
   });
 
   return NextResponse.json(task, { status: 201 });

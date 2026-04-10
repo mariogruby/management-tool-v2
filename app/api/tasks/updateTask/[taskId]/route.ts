@@ -2,6 +2,7 @@ import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import db from "@/lib/db";
 import { hasBoardAccess } from "@/lib/boardAccess";
+import { createActivity } from "@/lib/createActivity";
 
 export async function PATCH(
   req: Request,
@@ -39,6 +40,25 @@ export async function PATCH(
       ...(dueDate !== undefined && { dueDate: dueDate ? new Date(dueDate) : null }),
     },
   });
+
+  const actor = user.name ?? user.email;
+  if (completed !== undefined) {
+    await createActivity({
+      type: completed ? "task_completed" : "task_reopened",
+      message: completed
+        ? `${actor} completó la tarea "${task.title}"`
+        : `${actor} reactivó la tarea "${task.title}"`,
+      boardId: task.list.board.id,
+      userId: user.id,
+    });
+  } else if (title !== undefined) {
+    await createActivity({
+      type: "task_renamed",
+      message: `${actor} renombró la tarea "${task.title}" a "${title.trim()}"`,
+      boardId: task.list.board.id,
+      userId: user.id,
+    });
+  }
 
   return NextResponse.json(updated);
 }

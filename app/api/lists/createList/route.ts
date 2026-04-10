@@ -1,6 +1,8 @@
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import db from "@/lib/db";
+import { hasBoardAccess } from "@/lib/boardAccess";
+import { createActivity } from "@/lib/createActivity";
 
 export async function POST(req: Request) {
   const { userId } = await auth();
@@ -25,11 +27,8 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const board = await db.board.findUnique({
-    where: { id: boardId, userId: user.id },
-  });
-
-  if (!board) {
+  const allowed = await hasBoardAccess(user.id, boardId);
+  if (!allowed) {
     return NextResponse.json({ error: "Board not found" }, { status: 404 });
   }
 
@@ -44,6 +43,13 @@ export async function POST(req: Request) {
       boardId,
       order: lastList ? lastList.order + 1 : 0,
     },
+  });
+
+  await createActivity({
+    type: "list_created",
+    message: `${user.name ?? user.email} creó la lista "${list.title}"`,
+    boardId,
+    userId: user.id,
   });
 
   return NextResponse.json(list, { status: 201 });

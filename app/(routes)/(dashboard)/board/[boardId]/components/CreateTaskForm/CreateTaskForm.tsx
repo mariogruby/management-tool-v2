@@ -37,7 +37,7 @@ export function CreateTaskForm({ listId }: CreateTaskFormProps) {
 
       if (res.ok) {
         const task = await res.json();
-        addTask(listId, task);
+        addTask(listId, { ...task, labels: [], assignees: [] });
         handleClose();
       }
     } finally {

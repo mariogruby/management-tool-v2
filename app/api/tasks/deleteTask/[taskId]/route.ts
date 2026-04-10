@@ -2,6 +2,7 @@ import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import db from "@/lib/db";
 import { hasBoardAccess } from "@/lib/boardAccess";
+import { createActivity } from "@/lib/createActivity";
 
 export async function DELETE(
   _req: Request,
@@ -24,6 +25,13 @@ export async function DELETE(
   if (!allowed) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   await db.task.delete({ where: { id: taskId } });
+
+  await createActivity({
+    type: "task_deleted",
+    message: `${user.name ?? user.email} eliminó la tarea "${task.title}"`,
+    boardId: task.list.board.id,
+    userId: user.id,
+  });
 
   return NextResponse.json({ success: true });
 }

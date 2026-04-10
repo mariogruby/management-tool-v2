@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { MoreHorizontal, Trash2, Pencil, Users } from "lucide-react";
+import { Activity, MoreHorizontal, Trash2, Pencil, Users } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,6 +14,7 @@ import { useBoardsStore } from "@/store/useBoardsStore";
 import { useRouter } from "next/navigation";
 import { BoardHeaderProps } from "./BoardHeader.types";
 import { BoardMembers } from "../BoardMembers/BoardMembers";
+import { BoardActivity } from "../BoardActivity/BoardActivity";
 
 export function BoardHeader({ boardId, title }: BoardHeaderProps) {
   const router = useRouter();
@@ -25,6 +26,7 @@ export function BoardHeader({ boardId, title }: BoardHeaderProps) {
   const [savedTitle, setSavedTitle] = useState(title);
   const [loading, setLoading] = useState(false);
   const [membersOpen, setMembersOpen] = useState(false);
+  const [activityOpen, setActivityOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const startEditing = () => {
@@ -70,6 +72,11 @@ export function BoardHeader({ boardId, title }: BoardHeaderProps) {
         open={membersOpen}
         onClose={() => setMembersOpen(false)}
       />
+      <BoardActivity
+        boardId={boardId}
+        open={activityOpen}
+        onClose={() => setActivityOpen(false)}
+      />
 
       <div className="flex items-center justify-between gap-4">
         {isEditing ? (
@@ -96,6 +103,15 @@ export function BoardHeader({ boardId, title }: BoardHeaderProps) {
         )}
 
         <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setActivityOpen(true)}
+            disabled={loading}
+          >
+            <Activity size={15} />
+            Actividad
+          </Button>
           <Button
             variant="outline"
             size="sm"

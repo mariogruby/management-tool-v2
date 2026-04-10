@@ -2,6 +2,7 @@ import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import db from "@/lib/db";
 import { isBoardOwner } from "@/lib/boardAccess";
+import { createActivity } from "@/lib/createActivity";
 
 export async function POST(
   req: Request,
@@ -35,9 +36,10 @@ export async function POST(
   } else {
     await db.taskAssignee.create({ data: { taskId, userId: assigneeId } });
 
+    const actorName = user.name ?? user.email;
+
     // Notify the assignee (skip if assigning themselves)
     if (assigneeId !== user.id) {
-      const actorName = user.name ?? user.email;
       await db.notification.create({
         data: {
           type: "assigned",
@@ -48,6 +50,15 @@ export async function POST(
         },
       });
     }
+
+    // Log activity
+    const assignee = await db.user.findUnique({ where: { id: assigneeId }, select: { name: true, email: true } });
+    await createActivity({
+      type: "task_assigned",
+      message: `${actorName} asignó "${task.title}" a ${assignee?.name ?? assignee?.email ?? assigneeId}`,
+      boardId: task.list.board.id,
+      userId: user.id,
+    });
 
     return NextResponse.json({ active: true });
   }

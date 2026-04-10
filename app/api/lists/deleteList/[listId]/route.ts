@@ -2,6 +2,7 @@ import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import db from "@/lib/db";
 import { hasBoardAccess } from "@/lib/boardAccess";
+import { createActivity } from "@/lib/createActivity";
 
 export async function DELETE(
   _req: Request,
@@ -24,6 +25,13 @@ export async function DELETE(
   if (!allowed) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   await db.list.delete({ where: { id: listId } });
+
+  await createActivity({
+    type: "list_deleted",
+    message: `${user.name ?? user.email} eliminó la lista "${list.title}"`,
+    boardId: list.board.id,
+    userId: user.id,
+  });
 
   return NextResponse.json({ success: true });
 }
