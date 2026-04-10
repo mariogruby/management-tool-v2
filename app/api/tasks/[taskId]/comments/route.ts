@@ -48,5 +48,23 @@ export async function POST(
     include: { user: { select: { name: true, email: true } } },
   });
 
+  // Notify assignees (skip the commenter)
+  const assignees = await db.taskAssignee.findMany({
+    where: { taskId, userId: { not: user.id } },
+    select: { userId: true },
+  });
+  if (assignees.length > 0) {
+    const actorName = user.name ?? user.email;
+    await db.notification.createMany({
+      data: assignees.map((a) => ({
+        type: "comment",
+        message: `${actorName} comentó en la tarea "${task.title}"`,
+        userId: a.userId,
+        boardId: task.list.board.id,
+        taskId,
+      })),
+    });
+  }
+
   return NextResponse.json(comment, { status: 201 });
 }

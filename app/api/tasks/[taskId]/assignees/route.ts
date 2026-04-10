@@ -34,6 +34,21 @@ export async function POST(
     return NextResponse.json({ active: false });
   } else {
     await db.taskAssignee.create({ data: { taskId, userId: assigneeId } });
+
+    // Notify the assignee (skip if assigning themselves)
+    if (assigneeId !== user.id) {
+      const actorName = user.name ?? user.email;
+      await db.notification.create({
+        data: {
+          type: "assigned",
+          message: `${actorName} te asignó la tarea "${task.title}"`,
+          userId: assigneeId,
+          boardId: task.list.board.id,
+          taskId,
+        },
+      });
+    }
+
     return NextResponse.json({ active: true });
   }
 }

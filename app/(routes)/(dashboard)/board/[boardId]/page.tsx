@@ -23,6 +23,7 @@ export default async function BoardPage({ params }: BoardPageProps) {
       OR: [{ userId: user.id }, { members: { some: { userId: user.id } } }],
     },
     include: {
+      user: { select: { id: true, name: true, email: true } },
       members: {
         include: { user: { select: { id: true, name: true, email: true } } },
       },
@@ -49,18 +50,18 @@ export default async function BoardPage({ params }: BoardPageProps) {
 
   const isOwner = board.userId === user.id;
 
-  // Owner + members as assignable users (owner comes from the current user if they are owner)
-  const ownerUser = { id: user.id, name: user.name, email: user.email };
+  // Owner + members as assignable users (deduped by id)
+  const ownerUser = { id: board.user.id, name: board.user.name, email: board.user.email };
   const memberUsers = board.members.map((m) => ({
     id: m.user.id,
     name: m.user.name,
     email: m.user.email,
   }));
-  const boardUsers = isOwner
-    ? [ownerUser, ...memberUsers]
-    : memberUsers.some((m) => m.id === user.id)
-      ? [ownerUser, ...memberUsers]
-      : memberUsers;
+  const seen = new Set([ownerUser.id]);
+  const boardUsers = [
+    ownerUser,
+    ...memberUsers.filter((m) => !seen.has(m.id) && seen.add(m.id)),
+  ];
 
   return (
     <div className="flex flex-col h-full p-6 gap-6">
