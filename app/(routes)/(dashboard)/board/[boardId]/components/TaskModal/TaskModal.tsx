@@ -20,6 +20,7 @@ import {
 } from "../TaskAttachments/TaskAttachments";
 import { TaskDescriptionEditor } from "../TaskDescriptionEditor/TaskDescriptionEditor";
 import { TaskAssignees } from "../TaskAssignees/TaskAssignees";
+import { TaskSubtasks } from "../TaskSubtasks/TaskSubtasks";
 import type { LabelModel } from "@/lib/generated/prisma/models/Label";
 import type { TaskAssignee } from "../TaskCard/TaskCard.types";
 import { TaskModalProps } from "./TaskModal.types";
@@ -264,6 +265,8 @@ export function TaskModal({
                 </div>
               )}
             </div>
+
+            <TaskSubtasks taskId={task.id} />
           </div>
 
           {/* Right — comments */}
