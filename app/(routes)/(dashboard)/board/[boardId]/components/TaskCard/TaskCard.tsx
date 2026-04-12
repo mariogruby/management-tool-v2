@@ -9,6 +9,7 @@ import { TaskCardProps } from "./TaskCard.types";
 import { TaskActions } from "../TaskActions/TaskActions";
 import { TaskModal } from "../TaskModal/TaskModal";
 import { useBoardStore } from "../../store/useBoardStore";
+import { getPriority } from "../TaskPriority/TaskPriority.constants";
 
 export function TaskCard({ task, listId, listTitle, boardId, isOwner, boardUsers }: TaskCardProps) {
   const updateTask = useBoardStore((s) => s.updateTask);
@@ -67,6 +68,17 @@ export function TaskCard({ task, listId, listTitle, boardId, isOwner, boardUsers
       >
         {task.title}
       </span>
+
+      {(() => {
+        const p = getPriority(task.priority);
+        return p ? (
+          <span
+            className={cn("text-[10px] font-medium px-1.5 py-0.5 rounded shrink-0", p.bg)}
+          >
+            {p.label}
+          </span>
+        ) : null;
+      })()}
 
       <div onPointerDown={(e) => e.stopPropagation()}>
         <TaskActions taskId={task.id} listId={listId} />

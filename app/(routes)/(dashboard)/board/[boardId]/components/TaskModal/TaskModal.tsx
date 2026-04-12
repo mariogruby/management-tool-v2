@@ -21,6 +21,8 @@ import {
 import { TaskDescriptionEditor } from "../TaskDescriptionEditor/TaskDescriptionEditor";
 import { TaskAssignees } from "../TaskAssignees/TaskAssignees";
 import { TaskSubtasks } from "../TaskSubtasks/TaskSubtasks";
+import { TaskPriority } from "../TaskPriority/TaskPriority";
+import type { Priority } from "../TaskPriority/TaskPriority.constants";
 import type { LabelModel } from "@/lib/generated/prisma/models/Label";
 import type { TaskAssignee } from "../TaskCard/TaskCard.types";
 import { TaskModalProps } from "./TaskModal.types";
@@ -55,6 +57,9 @@ export function TaskModal({
   );
   const [activeAssignees, setActiveAssignees] = useState<TaskAssignee[]>(
     task.assignees,
+  );
+  const [priority, setPriority] = useState<Priority | null>(
+    (task.priority as Priority) ?? null,
   );
   const [editingTitle, setEditingTitle] = useState(false);
   const [editingDescription, setEditingDescription] = useState(false);
@@ -187,6 +192,11 @@ export function TaskModal({
                     }}
                   />
                 )}
+                <TaskPriority
+                  taskId={task.id}
+                  priority={priority}
+                  onSaved={setPriority}
+                />
                 <Button
                   variant="outline"
                   onClick={() => attachmentsRef.current?.openFilePicker()}

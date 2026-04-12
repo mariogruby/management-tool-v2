@@ -9,6 +9,7 @@ export type BoardUser = Pick<UserModel, "id" | "name" | "email">;
 export type TaskWithLabels = TaskModel & {
   labels: { label: LabelModel }[];
   assignees: TaskAssignee[];
+  priority?: string | null;
 };
 
 export type ListWithTasks = ListModel & { tasks: TaskWithLabels[] };
@@ -20,4 +21,4 @@ export type TaskCardProps = {
   boardId: string;
   isOwner: boolean;
   boardUsers: BoardUser[];
-}
+};
