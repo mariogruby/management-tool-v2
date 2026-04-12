@@ -24,6 +24,9 @@ import { CreateListForm } from "../CreateListForm/CreateListForm";
 import { BoardContentProps } from "./BoardContent.types";
 import { BoardFilters } from "../BoardFilters/BoardFilters";
 import { BoardFiltersState } from "../BoardFilters/BoardFilters.types";
+import { BoardListView } from "../BoardListView/BoardListView";
+import { LayoutList, Columns3 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const DEFAULT_FILTERS: BoardFiltersState = {
   status: "all",
@@ -73,6 +76,7 @@ export function BoardContent({ lists: initialLists, boardId, isOwner, boardUsers
   const [activeTask, setActiveTask] = useState<TaskModel | null>(null);
   const [activeList, setActiveList] = useState<ListWithTasks | null>(null);
   const [filters, setFilters] = useState<BoardFiltersState>(DEFAULT_FILTERS);
+  const [view, setView] = useState<"kanban" | "list">("kanban");
 
   useEffect(() => {
     setLists(initialLists);
@@ -178,44 +182,75 @@ export function BoardContent({ lists: initialLists, boardId, isOwner, boardUsers
 
   return (
     <div className="flex flex-col gap-4 h-full">
-      <BoardFilters
-        filters={filters}
-        onChange={setFilters}
-        availableLabels={availableLabels}
-      />
+      <div className="flex items-center gap-2">
+        <BoardFilters
+          filters={filters}
+          onChange={setFilters}
+          availableLabels={availableLabels}
+        />
+        <div className="flex items-center gap-1 ml-auto shrink-0">
+          <Button
+            variant={view === "kanban" ? "secondary" : "ghost"}
+            size="icon"
+            onClick={() => setView("kanban")}
+            title="Vista Kanban"
+          >
+            <Columns3 size={16} />
+          </Button>
+          <Button
+            variant={view === "list" ? "secondary" : "ghost"}
+            size="icon"
+            onClick={() => setView("list")}
+            title="Vista Lista"
+          >
+            <LayoutList size={16} />
+          </Button>
+        </div>
+      </div>
 
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCorners}
-        onDragStart={onDragStart}
-        onDragOver={onDragOver}
-        onDragEnd={onDragEnd}
-      >
-        <SortableContext
-          items={lists.map((l) => l.id)}
-          strategy={horizontalListSortingStrategy}
+      {view === "list" && (
+        <BoardListView
+          lists={filteredLists}
+          boardId={boardId}
+          isOwner={isOwner}
+          boardUsers={boardUsers}
+        />
+      )}
+
+      {view === "kanban" && (
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCorners}
+          onDragStart={onDragStart}
+          onDragOver={onDragOver}
+          onDragEnd={onDragEnd}
         >
-          <div className="flex gap-4 overflow-x-auto pb-4 items-start">
-            {filteredLists.map((list) => (
-              <ListItem key={list.id} list={list} boardId={boardId} isOwner={isOwner} boardUsers={boardUsers} />
-            ))}
-            <CreateListForm boardId={boardId} />
-          </div>
-        </SortableContext>
+          <SortableContext
+            items={lists.map((l) => l.id)}
+            strategy={horizontalListSortingStrategy}
+          >
+            <div className="flex gap-4 overflow-x-auto pb-4 items-start">
+              {filteredLists.map((list) => (
+                <ListItem key={list.id} list={list} boardId={boardId} isOwner={isOwner} boardUsers={boardUsers} />
+              ))}
+              <CreateListForm boardId={boardId} />
+            </div>
+          </SortableContext>
 
-        <DragOverlay>
-          {activeTask && (
-            <div className="bg-background rounded-lg px-3 py-2 shadow-md border text-sm rotate-2 opacity-95">
-              {activeTask.title}
-            </div>
-          )}
-          {activeList && (
-            <div className="bg-muted rounded-xl w-64 p-3 shadow-md opacity-95">
-              <h3 className="font-semibold text-sm">{activeList.title}</h3>
-            </div>
-          )}
-        </DragOverlay>
-      </DndContext>
+          <DragOverlay>
+            {activeTask && (
+              <div className="bg-background rounded-lg px-3 py-2 shadow-md border text-sm rotate-2 opacity-95">
+                {activeTask.title}
+              </div>
+            )}
+            {activeList && (
+              <div className="bg-muted rounded-xl w-64 p-3 shadow-md opacity-95">
+                <h3 className="font-semibold text-sm">{activeList.title}</h3>
+              </div>
+            )}
+          </DragOverlay>
+        </DndContext>
+      )}
     </div>
   );
 }
