@@ -75,6 +75,7 @@ export function BoardContent({ lists: initialLists, boardId, isOwner, boardUsers
   const { lists, setLists, reorderLists, moveTask } = useBoardStore();
   const [activeTask, setActiveTask] = useState<TaskModel | null>(null);
   const [activeList, setActiveList] = useState<ListWithTasks | null>(null);
+  const [dragOriginListId, setDragOriginListId] = useState<string | null>(null);
   const [filters, setFilters] = useState<BoardFiltersState>(DEFAULT_FILTERS);
   const [view, setView] = useState<"kanban" | "list">("kanban");
 
@@ -117,8 +118,10 @@ export function BoardContent({ lists: initialLists, boardId, isOwner, boardUsers
   }, [lists, filters]);
 
   const onDragStart = ({ active }: DragStartEvent) => {
-    if (active.data.current?.type === "task")
+    if (active.data.current?.type === "task") {
       setActiveTask(active.data.current.task);
+      setDragOriginListId(active.data.current.listId as string);
+    }
     if (active.data.current?.type === "list")
       setActiveList(active.data.current.list);
   };
@@ -148,8 +151,10 @@ export function BoardContent({ lists: initialLists, boardId, isOwner, boardUsers
   };
 
   const onDragEnd = ({ active, over }: DragEndEvent) => {
+    const fromListId = dragOriginListId;
     setActiveTask(null);
     setActiveList(null);
+    setDragOriginListId(null);
     if (!over) return;
 
     if (active.data.current?.type === "list" && active.id !== over.id) {
@@ -172,10 +177,20 @@ export function BoardContent({ lists: initialLists, boardId, isOwner, boardUsers
         list.tasks.map((task, i) => ({ id: task.id, order: i, listId: list.id })),
       );
 
+      // Find the list where the task ended up
+      const toListId = lists.find((l) =>
+        l.tasks.some((t) => t.id === active.id)
+      )?.id ?? null;
+
       fetch("/api/tasks/updateOrder", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ items: taskUpdates }),
+        body: JSON.stringify({
+          items: taskUpdates,
+          movedTaskId: active.id,
+          fromListId,
+          toListId,
+        }),
       });
     }
   };
