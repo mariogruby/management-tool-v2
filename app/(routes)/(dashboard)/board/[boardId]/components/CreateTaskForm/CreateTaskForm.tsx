@@ -4,6 +4,7 @@ import { useState, useRef } from "react";
 import { Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
 import { useBoardStore } from "../../store/useBoardStore";
 import { CreateTaskFormProps } from "./CreateTaskForm.types";
 
@@ -39,7 +40,11 @@ export function CreateTaskForm({ listId }: CreateTaskFormProps) {
         const task = await res.json();
         addTask(listId, { ...task, labels: [], assignees: [] });
         handleClose();
+      } else {
+        toast.error("Error al crear la tarea");
       }
+    } catch {
+      toast.error("Error al crear la tarea");
     } finally {
       setLoading(false);
     }

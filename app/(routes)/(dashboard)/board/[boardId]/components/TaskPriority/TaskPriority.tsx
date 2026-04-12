@@ -8,6 +8,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import {
   PRIORITIES,
@@ -22,12 +23,19 @@ export function TaskPriority({ taskId, priority, onSaved }: TaskPriorityProps) {
 
   const select = async (value: Priority | null) => {
     setOpen(false);
+    const prev = priority;
     onSaved(value);
-    await fetch(`/api/tasks/updateTask/${taskId}`, {
+    const res = await fetch(`/api/tasks/updateTask/${taskId}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ priority: value }),
     });
+    if (res.ok) {
+      toast.success(value ? `Prioridad: ${PRIORITIES.find((p) => p.value === value)?.label}` : "Prioridad eliminada");
+    } else {
+      onSaved(prev as Priority | null);
+      toast.error("Error al cambiar la prioridad");
+    }
   };
 
   return (

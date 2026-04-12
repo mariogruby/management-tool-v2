@@ -9,6 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
 import { useBoardStore } from "../../store/useBoardStore";
 import { ListHeaderProps } from "./ListHeader.types";
 
@@ -39,21 +40,32 @@ export function ListHeader({ listId, title, taskCount }: ListHeaderProps) {
       return;
     }
     setLoading(true);
-    await fetch(`/api/lists/updateList/${listId}`, {
+    const res = await fetch(`/api/lists/updateList/${listId}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ title: trimmed }),
     });
-    renameList(listId, trimmed);
-    setSavedTitle(trimmed);
+    if (res.ok) {
+      renameList(listId, trimmed);
+      setSavedTitle(trimmed);
+      toast.success("Lista renombrada");
+    } else {
+      toast.error("Error al renombrar la lista");
+    }
     setIsEditing(false);
     setLoading(false);
   };
 
   const handleDelete = async () => {
     setLoading(true);
-    await fetch(`/api/lists/deleteList/${listId}`, { method: "DELETE" });
-    removeList(listId);
+    const res = await fetch(`/api/lists/deleteList/${listId}`, { method: "DELETE" });
+    if (res.ok) {
+      removeList(listId);
+      toast.success("Lista eliminada");
+    } else {
+      toast.error("Error al eliminar la lista");
+    }
+    setLoading(false);
   };
 
   return (

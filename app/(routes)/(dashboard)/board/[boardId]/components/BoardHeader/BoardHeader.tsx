@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useBoardsStore } from "@/store/useBoardsStore";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { BoardHeaderProps } from "./BoardHeader.types";
 import { BoardMembers } from "../BoardMembers/BoardMembers";
 import { BoardActivity } from "../BoardActivity/BoardActivity";
@@ -46,23 +47,34 @@ export function BoardHeader({ boardId, title }: BoardHeaderProps) {
       return;
     }
     setLoading(true);
-    await fetch(`/api/boards/updateBoard/${boardId}`, {
+    const res = await fetch(`/api/boards/updateBoard/${boardId}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ title: trimmed }),
     });
-    renameBoard(boardId, trimmed);
-    setSavedTitle(trimmed);
+    if (res.ok) {
+      renameBoard(boardId, trimmed);
+      setSavedTitle(trimmed);
+      toast.success("Board renombrado");
+      router.refresh();
+    } else {
+      setValue(savedTitle);
+      toast.error("Error al renombrar el board");
+    }
     setIsEditing(false);
     setLoading(false);
-    router.refresh();
   };
 
   const handleDelete = async () => {
     setLoading(true);
-    await fetch(`/api/boards/deleteBoard/${boardId}`, { method: "DELETE" });
-    removeBoard(boardId);
-    router.push("/dashboard/boards");
+    const res = await fetch(`/api/boards/deleteBoard/${boardId}`, { method: "DELETE" });
+    if (res.ok) {
+      removeBoard(boardId);
+      router.push("/dashboard/boards");
+    } else {
+      toast.error("Error al eliminar el board");
+      setLoading(false);
+    }
   };
 
   return (

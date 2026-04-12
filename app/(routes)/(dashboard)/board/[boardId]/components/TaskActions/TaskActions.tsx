@@ -8,6 +8,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { toast } from "sonner";
 import { useBoardStore } from "../../store/useBoardStore";
 import { TaskActionsProps } from "./TaskActions.types";
 
@@ -17,8 +18,14 @@ export function TaskActions({ taskId, listId }: TaskActionsProps) {
 
   const handleDelete = async () => {
     setLoading(true);
-    await fetch(`/api/tasks/deleteTask/${taskId}`, { method: "DELETE" });
-    removeTask(listId, taskId);
+    const res = await fetch(`/api/tasks/deleteTask/${taskId}`, { method: "DELETE" });
+    if (res.ok) {
+      removeTask(listId, taskId);
+      toast.success("Tarea eliminada");
+    } else {
+      toast.error("Error al eliminar la tarea");
+    }
+    setLoading(false);
   };
 
   return (

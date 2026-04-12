@@ -4,8 +4,9 @@ import { useState, useRef } from "react";
 import { Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
 import { useBoardStore } from "../../store/useBoardStore";
-import {CreateListFormProps} from "./CreateListForm.types"
+import { CreateListFormProps } from "./CreateListForm.types";
 
 export function CreateListForm({ boardId }: CreateListFormProps) {
   const [open, setOpen] = useState(false);
@@ -39,7 +40,11 @@ export function CreateListForm({ boardId }: CreateListFormProps) {
         const list = await res.json();
         addList({ ...list, tasks: [] });
         handleClose();
+      } else {
+        toast.error("Error al crear la lista");
       }
+    } catch {
+      toast.error("Error al crear la lista");
     } finally {
       setLoading(false);
     }

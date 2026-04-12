@@ -26,6 +26,7 @@ import type { Priority } from "../TaskPriority/TaskPriority.constants";
 import type { LabelModel } from "@/lib/generated/prisma/models/Label";
 import type { TaskAssignee } from "../TaskCard/TaskCard.types";
 import { TaskModalProps } from "./TaskModal.types";
+import { toast } from "sonner";
 
 export function TaskModal({
   task,
@@ -68,12 +69,18 @@ export function TaskModal({
   const toggleCompleted = async () => {
     const next = !completed;
     setCompleted(next);
-    await fetch(`/api/tasks/updateTask/${task.id}`, {
+    const res = await fetch(`/api/tasks/updateTask/${task.id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ completed: next }),
     });
-    updateTask(listId, task.id, { completed: next });
+    if (res.ok) {
+      updateTask(listId, task.id, { completed: next });
+      toast.success(next ? "Tarea completada" : "Tarea reactivada");
+    } else {
+      setCompleted(!next);
+      toast.error("Error al actualizar la tarea");
+    }
   };
 
   const saveTitle = async () => {
@@ -83,13 +90,19 @@ export function TaskModal({
       return;
     }
     setLoading(true);
-    await fetch(`/api/tasks/updateTask/${task.id}`, {
+    const res = await fetch(`/api/tasks/updateTask/${task.id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ title: trimmed }),
     });
-    updateTask(listId, task.id, { title: trimmed });
-    setSavedTitle(trimmed);
+    if (res.ok) {
+      updateTask(listId, task.id, { title: trimmed });
+      setSavedTitle(trimmed);
+      toast.success("Título actualizado");
+    } else {
+      setTitle(savedTitle);
+      toast.error("Error al actualizar el título");
+    }
     setLoading(false);
   };
 
@@ -99,13 +112,18 @@ export function TaskModal({
       return;
     }
     setLoading(true);
-    await fetch(`/api/tasks/updateTask/${task.id}`, {
+    const res = await fetch(`/api/tasks/updateTask/${task.id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ description: html }),
     });
-    updateTask(listId, task.id, { description: html || null });
-    setSavedDescription(html);
+    if (res.ok) {
+      updateTask(listId, task.id, { description: html || null });
+      setSavedDescription(html);
+      toast.success("Descripción guardada");
+    } else {
+      toast.error("Error al guardar la descripción");
+    }
     setEditingDescription(false);
     setLoading(false);
   };
@@ -195,7 +213,10 @@ export function TaskModal({
                 <TaskPriority
                   taskId={task.id}
                   priority={priority}
-                  onSaved={setPriority}
+                  onSaved={(p) => {
+                    setPriority(p);
+                    updateTask(listId, task.id, { priority: p });
+                  }}
                 />
                 <Button
                   variant="outline"
