@@ -412,7 +412,7 @@ export function TaskModal({
           </div>
 
           {/* Right — comments */}
-          <div className="w-72 shrink-0 flex flex-col px-4 pt-2 pb-4 overflow-hidden">
+          <div className="w-72 shrink-0 flex flex-col px-4 pt-2 pb-4 min-h-0">
             <TaskComments taskId={currentTask.id} />
           </div>
         </div>

@@ -13,6 +13,7 @@ export function TaskComments({ taskId }: TaskCommentsProps) {
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true); // true = loading until first fetch completes
   const bottomRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     fetch(`/api/tasks/${taskId}/comments`)
@@ -40,6 +41,7 @@ export function TaskComments({ taskId }: TaskCommentsProps) {
     const comment = await res.json();
     setComments((prev) => [...prev, comment]);
     setValue("");
+    if (textareaRef.current) textareaRef.current.style.height = "24px";
     setLoading(false);
   };
 
@@ -76,7 +78,7 @@ export function TaskComments({ taskId }: TaskCommentsProps) {
                 </button>
               </div>
             </div>
-            <p className="text-sm bg-muted rounded-lg px-3 py-2 whitespace-pre-wrap">{c.content}</p>
+            <p className="text-sm bg-muted rounded-lg px-3 py-2 whitespace-pre-wrap wrap-break-word min-w-0">{c.content}</p>
           </div>
         ))}
         <div ref={bottomRef} />
@@ -85,8 +87,13 @@ export function TaskComments({ taskId }: TaskCommentsProps) {
       {/* Input */}
       <div className="mt-3 flex gap-2 items-end border rounded-xl px-3 py-2 focus-within:ring-1 focus-within:ring-ring">
         <textarea
+          ref={textareaRef}
           value={value}
-          onChange={(e) => setValue(e.target.value)}
+          onChange={(e) => {
+            setValue(e.target.value);
+            e.target.style.height = "auto";
+            e.target.style.height = `${Math.min(e.target.scrollHeight, 72)}px`;
+          }}
           onKeyDown={(e) => {
             if (e.key === "Enter" && !e.shiftKey) {
               e.preventDefault();
@@ -96,7 +103,8 @@ export function TaskComments({ taskId }: TaskCommentsProps) {
           placeholder="Escribe un comentario..."
           rows={1}
           disabled={loading}
-          className="flex-1 resize-none bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+          style={{ height: "24px" }}
+          className="flex-1 resize-none bg-transparent text-sm outline-none placeholder:text-muted-foreground overflow-y-auto"
         />
         <button
           onClick={submit}
