@@ -12,11 +12,11 @@ export default async function LayoutDashboard({
 }) {
   const { userId } = await auth();
 
-  const boards = await (async () => {
-    if (!userId) return [];
+  const { boards, dbUserId } = await (async () => {
+    if (!userId) return { boards: [], dbUserId: "" };
     const user = await db.user.findUnique({ where: { clerkId: userId } });
-    if (!user) return [];
-    return db.board.findMany({
+    if (!user) return { boards: [], dbUserId: "" };
+    const boards = await db.board.findMany({
       where: {
         OR: [
           { userId: user.id },
@@ -25,11 +25,12 @@ export default async function LayoutDashboard({
       },
       orderBy: { createdAt: "desc" },
     });
+    return { boards, dbUserId: user.id };
   })();
 
   return (
     <SidebarProvider>
-      <BoardsStoreInitializer boards={boards} />
+      <BoardsStoreInitializer boards={boards} ownUserId={dbUserId} />
       <AppSidebar />
       <main className="flex flex-col flex-1 min-h-screen w-full overflow-auto">
         <Navbar />
