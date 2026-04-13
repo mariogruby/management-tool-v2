@@ -297,7 +297,7 @@ export function TaskModal({
               )}
             </div>
 
-            <TaskSubtasks taskId={task.id} />
+            <TaskSubtasks taskId={task.id} listId={listId} />
           </div>
 
           {/* Right — comments */}

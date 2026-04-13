@@ -7,4 +7,5 @@
 
 export interface TaskSubtasksProps {
   taskId: string;
+  listId: string;
 }

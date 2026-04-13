@@ -39,6 +39,8 @@ export default async function BoardPage({ params }: BoardPageProps) {
                   user: { select: { id: true, name: true, email: true } },
                 },
               },
+              subtasks: { select: { completed: true } },
+              _count: { select: { comments: true, attachments: true } },
             },
           },
         },

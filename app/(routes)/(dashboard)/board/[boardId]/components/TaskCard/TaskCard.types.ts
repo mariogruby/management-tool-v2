@@ -10,6 +10,11 @@ export type TaskWithLabels = TaskModel & {
   labels: { label: LabelModel }[];
   assignees: TaskAssignee[];
   priority?: string | null;
+  _count?: {
+    comments: number;
+    attachments: number;
+  };
+  subtasks?: { completed: boolean }[];
 };
 
 export type ListWithTasks = ListModel & { tasks: TaskWithLabels[] };

@@ -7,8 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { Subtask, TaskSubtasksProps } from "./TaskSubtasks.types";
+import { useBoardStore } from "../../store/useBoardStore";
 
-export function TaskSubtasks({ taskId }: TaskSubtasksProps) {
+export function TaskSubtasks({ taskId, listId }: TaskSubtasksProps) {
+  const updateTask = useBoardStore((s) => s.updateTask);
   const [subtasks, setSubtasks] = useState<Subtask[]>([]);
   const [adding, setAdding] = useState(false);
   const [newTitle, setNewTitle] = useState("");
@@ -30,6 +32,12 @@ export function TaskSubtasks({ taskId }: TaskSubtasksProps) {
   const total = subtasks.length;
   const progress = total === 0 ? 0 : Math.round((completed / total) * 100);
 
+  const syncStore = (updated: Subtask[]) => {
+    updateTask(listId, taskId, {
+      subtasks: updated.map((s) => ({ completed: s.completed })),
+    });
+  };
+
   const addSubtask = async () => {
     if (!newTitle.trim()) {
       setAdding(false);
@@ -42,7 +50,9 @@ export function TaskSubtasks({ taskId }: TaskSubtasksProps) {
     });
     if (res.ok) {
       const subtask = await res.json();
-      setSubtasks((prev) => [...prev, subtask]);
+      const updated = [...subtasks, subtask];
+      setSubtasks(updated);
+      syncStore(updated);
     }
     setNewTitle("");
     setAdding(false);
@@ -50,9 +60,11 @@ export function TaskSubtasks({ taskId }: TaskSubtasksProps) {
 
   const toggleCompleted = async (subtask: Subtask) => {
     const next = !subtask.completed;
-    setSubtasks((prev) =>
-      prev.map((s) => (s.id === subtask.id ? { ...s, completed: next } : s)),
+    const updated = subtasks.map((s) =>
+      s.id === subtask.id ? { ...s, completed: next } : s,
     );
+    setSubtasks(updated);
+    syncStore(updated);
     await fetch(`/api/tasks/${taskId}/subtasks/${subtask.id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -82,7 +94,9 @@ export function TaskSubtasks({ taskId }: TaskSubtasksProps) {
   };
 
   const deleteSubtask = async (id: string) => {
-    setSubtasks((prev) => prev.filter((s) => s.id !== id));
+    const updated = subtasks.filter((s) => s.id !== id);
+    setSubtasks(updated);
+    syncStore(updated);
     await fetch(`/api/tasks/${taskId}/subtasks/${id}`, { method: "DELETE" });
   };
 
