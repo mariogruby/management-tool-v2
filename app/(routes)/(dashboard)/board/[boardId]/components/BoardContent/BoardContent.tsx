@@ -245,6 +245,14 @@ export function BoardContent({ lists: initialLists, boardId, isOwner, boardUsers
             strategy={horizontalListSortingStrategy}
           >
             <div className="flex gap-4 overflow-x-auto pb-4 items-start">
+              {lists.length === 0 && (
+                <div className="flex flex-col items-center justify-center gap-2 w-64 py-10 rounded-xl border-2 border-dashed border-border/50 text-muted-foreground/60 shrink-0 select-none">
+                  <Columns3 size={20} />
+                  <p className="text-xs text-center leading-relaxed">
+                    Crea tu primera lista<br />para empezar a organizar
+                  </p>
+                </div>
+              )}
               {filteredLists.map((list) => (
                 <ListItem key={list.id} list={list} boardId={boardId} isOwner={isOwner} boardUsers={boardUsers} />
               ))}

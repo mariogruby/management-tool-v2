@@ -6,6 +6,7 @@ import { ListItemProps } from "./ListItem.types";
 import { TaskCard } from "../TaskCard/TaskCard";
 import { CreateTaskForm } from "../CreateTaskForm/CreateTaskForm";
 import { ListHeader } from "../ListHeader/ListHeader";
+import { ArrowDownToLine } from "lucide-react";
 
 export function ListItem({ list, boardId, isOwner, boardUsers }: ListItemProps) {
   const {
@@ -44,9 +45,16 @@ export function ListItem({ list, boardId, isOwner, boardUsers }: ListItemProps) 
         strategy={verticalListSortingStrategy}
       >
         <div className="flex flex-col gap-2">
-          {list.tasks.map((task) => (
-            <TaskCard key={task.id} task={task} listId={list.id} listTitle={list.title} boardId={boardId} isOwner={isOwner} boardUsers={boardUsers} />
-          ))}
+          {list.tasks.length === 0 ? (
+            <div className="flex flex-col items-center justify-center gap-1.5 py-6 rounded-lg border-2 border-dashed border-border/50 text-muted-foreground/50 select-none">
+              <ArrowDownToLine size={16} />
+              <span className="text-xs">Arrastra una tarea aquí</span>
+            </div>
+          ) : (
+            list.tasks.map((task) => (
+              <TaskCard key={task.id} task={task} listId={list.id} listTitle={list.title} boardId={boardId} isOwner={isOwner} boardUsers={boardUsers} />
+            ))
+          )}
         </div>
       </SortableContext>
       <CreateTaskForm listId={list.id} />
