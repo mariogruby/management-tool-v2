@@ -1,7 +1,14 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { AlignLeft, CheckCircle2, Circle, Paperclip } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import {
+  AlignLeft,
+  CheckCircle2,
+  Circle,
+  ChevronLeft,
+  ChevronRight,
+  Paperclip,
+} from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -38,44 +45,120 @@ export function TaskModal({
   isOwner,
   boardUsers,
 }: TaskModalProps) {
+  const lists = useBoardStore((s) => s.lists);
   const updateTask = useBoardStore((s) => s.updateTask);
   const attachmentsRef = useRef<TaskAttachmentsHandle>(null);
 
-  const [title, setTitle] = useState(task.title);
-  const [savedTitle, setSavedTitle] = useState(task.title);
-  const [savedDescription, setSavedDescription] = useState(
-    task.description ?? "",
+  // Flat list of all tasks across all lists for navigation
+  const allTasks = lists.flatMap((l) =>
+    l.tasks.map((t) => ({ task: t, listId: l.id, listTitle: l.title })),
   );
-  const [completed, setCompleted] = useState(task.completed);
+
+  // Current navigation state — starts at the task that opened the modal
+  const [currentTask, setCurrentTask] = useState(task);
+  const [currentListId, setCurrentListId] = useState(listId);
+  const [currentListTitle, setCurrentListTitle] = useState(listTitle);
+
+  const currentIndex = allTasks.findIndex((e) => e.task.id === currentTask.id);
+  const hasPrev = currentIndex > 0;
+  const hasNext = currentIndex < allTasks.length - 1;
+
+  // Local editing state — all initialized from currentTask
+  const [title, setTitle] = useState(currentTask.title);
+  const [savedTitle, setSavedTitle] = useState(currentTask.title);
+  const [savedDescription, setSavedDescription] = useState(
+    currentTask.description ?? "",
+  );
+  const [completed, setCompleted] = useState(currentTask.completed);
   const [currentStartDate, setCurrentStartDate] = useState<Date | null>(
-    task.startDate ?? null,
+    currentTask.startDate ?? null,
   );
   const [currentDueDate, setCurrentDueDate] = useState<Date | null>(
-    task.dueDate ?? null,
+    currentTask.dueDate ?? null,
   );
   const [activeLabels, setActiveLabels] = useState<{ label: LabelModel }[]>(
-    task.labels,
+    currentTask.labels,
   );
   const [activeAssignees, setActiveAssignees] = useState<TaskAssignee[]>(
-    task.assignees,
+    currentTask.assignees,
   );
   const [priority, setPriority] = useState<Priority | null>(
-    (task.priority as Priority) ?? null,
+    (currentTask.priority as Priority) ?? null,
   );
   const [editingTitle, setEditingTitle] = useState(false);
   const [editingDescription, setEditingDescription] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  // Reset all local state when navigating to a different task
+  useEffect(() => {
+    const t = setTimeout(() => {
+      setTitle(currentTask.title);
+      setSavedTitle(currentTask.title);
+      setSavedDescription(currentTask.description ?? "");
+      setCompleted(currentTask.completed);
+      setCurrentStartDate(currentTask.startDate ?? null);
+      setCurrentDueDate(currentTask.dueDate ?? null);
+      setActiveLabels(currentTask.labels);
+      setActiveAssignees(currentTask.assignees);
+      setPriority((currentTask.priority as Priority) ?? null);
+      setEditingTitle(false);
+      setEditingDescription(false);
+    }, 0);
+    return () => clearTimeout(t);
+  }, [currentTask.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const goTo = (index: number) => {
+    const entry = allTasks[index];
+    if (!entry) return;
+    setCurrentTask(entry.task);
+    setCurrentListId(entry.listId);
+    setCurrentListTitle(entry.listTitle);
+  };
+
+  // Keyboard navigation (← →) when not editing text
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: KeyboardEvent) => {
+      if (editingTitle || editingDescription) return;
+      if (e.key === "ArrowLeft" && hasPrev) {
+        const entry = allTasks[currentIndex - 1];
+        if (entry) {
+          setCurrentTask(entry.task);
+          setCurrentListId(entry.listId);
+          setCurrentListTitle(entry.listTitle);
+        }
+      }
+      if (e.key === "ArrowRight" && hasNext) {
+        const entry = allTasks[currentIndex + 1];
+        if (entry) {
+          setCurrentTask(entry.task);
+          setCurrentListId(entry.listId);
+          setCurrentListTitle(entry.listTitle);
+        }
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [
+    open,
+    editingTitle,
+    editingDescription,
+    hasPrev,
+    hasNext,
+    currentIndex,
+    allTasks,
+  ]);
+
   const toggleCompleted = async () => {
     const next = !completed;
     setCompleted(next);
-    const res = await fetch(`/api/tasks/updateTask/${task.id}`, {
+    const res = await fetch(`/api/tasks/updateTask/${currentTask.id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ completed: next }),
     });
     if (res.ok) {
-      updateTask(listId, task.id, { completed: next });
+      updateTask(currentListId, currentTask.id, { completed: next });
       toast.success(next ? "Tarea completada" : "Tarea reactivada");
     } else {
       setCompleted(!next);
@@ -90,13 +173,13 @@ export function TaskModal({
       return;
     }
     setLoading(true);
-    const res = await fetch(`/api/tasks/updateTask/${task.id}`, {
+    const res = await fetch(`/api/tasks/updateTask/${currentTask.id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ title: trimmed }),
     });
     if (res.ok) {
-      updateTask(listId, task.id, { title: trimmed });
+      updateTask(currentListId, currentTask.id, { title: trimmed });
       setSavedTitle(trimmed);
       toast.success("Título actualizado");
     } else {
@@ -112,13 +195,13 @@ export function TaskModal({
       return;
     }
     setLoading(true);
-    const res = await fetch(`/api/tasks/updateTask/${task.id}`, {
+    const res = await fetch(`/api/tasks/updateTask/${currentTask.id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ description: html }),
     });
     if (res.ok) {
-      updateTask(listId, task.id, { description: html || null });
+      updateTask(currentListId, currentTask.id, { description: html || null });
       setSavedDescription(html);
       toast.success("Descripción guardada");
     } else {
@@ -131,13 +214,41 @@ export function TaskModal({
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="sm:max-w-4xl p-0 overflow-hidden">
-        <DialogHeader className="flex flex-row items-center px-4 py-4.5 border-b bg-muted/50">
-          <DialogTitle className="text-sm font-medium text-muted-foreground">
-            {listTitle}
+        <DialogHeader className="flex flex-row items-center gap-2 px-4 py-3 border-b bg-muted/50">
+          <DialogTitle className="text-sm font-medium text-muted-foreground flex-1 truncate">
+            {currentListTitle}
           </DialogTitle>
+
+          {/* Task navigation */}
+          <div className="flex items-center gap-1 shrink-0 mr-10">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7"
+              disabled={!hasPrev}
+              onClick={() => goTo(currentIndex - 1)}
+              title="Tarea anterior (←)"
+            >
+              <ChevronLeft size={15} />
+            </Button>
+            <span className="text-xs text-muted-foreground tabular-nums min-w-12 text-center">
+              {currentIndex + 1} / {allTasks.length}
+            </span>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7"
+              disabled={!hasNext}
+              onClick={() => goTo(currentIndex + 1)}
+              title="Tarea siguiente (→)"
+            >
+              <ChevronRight size={15} />
+            </Button>
+          </div>
         </DialogHeader>
 
         <div
+          key={currentTask.id}
           className="flex divide-x overflow-hidden"
           style={{ maxHeight: "70vh" }}
         >
@@ -193,15 +304,15 @@ export function TaskModal({
             <div className="flex flex-col gap-2">
               <div className="flex gap-2 flex-wrap">
                 <TaskLabels
-                  taskId={task.id}
+                  taskId={currentTask.id}
                   boardId={boardId}
-                  activeLabels={task.labels}
+                  activeLabels={currentTask.labels}
                   onLabelsChange={setActiveLabels}
                 />
                 {!currentStartDate && !currentDueDate && (
                   <TaskDatePicker
-                    taskId={task.id}
-                    listId={listId}
+                    taskId={currentTask.id}
+                    listId={currentListId}
                     startDate={currentStartDate}
                     dueDate={currentDueDate}
                     onSaved={(s, d) => {
@@ -211,11 +322,11 @@ export function TaskModal({
                   />
                 )}
                 <TaskPriority
-                  taskId={task.id}
+                  taskId={currentTask.id}
                   priority={priority}
                   onSaved={(p) => {
                     setPriority(p);
-                    updateTask(listId, task.id, { priority: p });
+                    updateTask(currentListId, currentTask.id, { priority: p });
                   }}
                 />
                 <Button
@@ -226,7 +337,7 @@ export function TaskModal({
                   <span>Adjuntar</span>
                 </Button>
                 <TaskAssignees
-                  taskId={task.id}
+                  taskId={currentTask.id}
                   boardUsers={boardUsers}
                   activeAssignees={activeAssignees}
                   isOwner={isOwner}
@@ -250,8 +361,8 @@ export function TaskModal({
 
               {(currentStartDate || currentDueDate) && (
                 <TaskDatePicker
-                  taskId={task.id}
-                  listId={listId}
+                  taskId={currentTask.id}
+                  listId={currentListId}
                   startDate={currentStartDate}
                   dueDate={currentDueDate}
                   hideTrigger
@@ -262,7 +373,7 @@ export function TaskModal({
                 />
               )}
 
-              <TaskAttachments ref={attachmentsRef} taskId={task.id} />
+              <TaskAttachments ref={attachmentsRef} taskId={currentTask.id} />
             </div>
 
             <div className="flex flex-col gap-2">
@@ -297,12 +408,12 @@ export function TaskModal({
               )}
             </div>
 
-            <TaskSubtasks taskId={task.id} listId={listId} />
+            <TaskSubtasks taskId={currentTask.id} listId={currentListId} />
           </div>
 
           {/* Right — comments */}
           <div className="w-72 shrink-0 flex flex-col px-4 pt-2 pb-4 overflow-hidden">
-            <TaskComments taskId={task.id} />
+            <TaskComments taskId={currentTask.id} />
           </div>
         </div>
       </DialogContent>
