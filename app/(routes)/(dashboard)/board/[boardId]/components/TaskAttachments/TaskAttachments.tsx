@@ -3,6 +3,7 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
 import { Trash2, FileText, ImageIcon } from "lucide-react";
 import type { AttachmentModel } from "@/lib/generated/prisma/models/Attachment";
+import { AttachmentsSkeleton } from "@/components/skeletons";
 
 function formatBytes(bytes: number) {
   if (bytes < 1024) return `${bytes} B`;
@@ -27,6 +28,7 @@ export const TaskAttachments = forwardRef<TaskAttachmentsHandle, { taskId: strin
   function TaskAttachments({ taskId }, ref) {
     const [attachments, setAttachments] = useState<AttachmentModel[]>([]);
     const [uploading, setUploading] = useState(false);
+    const [fetching, setFetching] = useState(true); // true = loading until first fetch completes
     const inputRef = useRef<HTMLInputElement>(null);
 
     useImperativeHandle(ref, () => ({
@@ -37,7 +39,11 @@ export const TaskAttachments = forwardRef<TaskAttachmentsHandle, { taskId: strin
     useEffect(() => {
       fetch(`/api/tasks/${taskId}/attachments`)
         .then((r) => r.json())
-        .then(setAttachments);
+        .then((data) => {
+          setAttachments(Array.isArray(data) ? data : []);
+          setFetching(false);
+        })
+        .catch(() => setFetching(false));
     }, [taskId]);
 
     const uploadFile = async (file: File) => {
@@ -65,18 +71,6 @@ export const TaskAttachments = forwardRef<TaskAttachmentsHandle, { taskId: strin
       });
     };
 
-    if (attachments.length === 0) {
-      return (
-        <input
-          ref={inputRef}
-          type="file"
-          multiple
-          className="hidden"
-          onChange={(e) => handleFiles(e.target.files)}
-        />
-      );
-    }
-
     return (
       <div className="flex flex-col gap-1">
         <input
@@ -86,7 +80,8 @@ export const TaskAttachments = forwardRef<TaskAttachmentsHandle, { taskId: strin
           className="hidden"
           onChange={(e) => handleFiles(e.target.files)}
         />
-        {attachments.map((attachment) => (
+        {fetching && <AttachmentsSkeleton count={2} />}
+        {!fetching && attachments.map((attachment) => (
           <div
             key={attachment.id}
             className="group flex items-center gap-2 rounded-md px-2 py-1.5 hover:bg-muted transition-colors"

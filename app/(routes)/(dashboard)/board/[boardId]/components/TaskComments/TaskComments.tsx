@@ -5,17 +5,23 @@ import { Send, Trash2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
 import { CommentItem, TaskCommentsProps } from "./TaskComments.types";
+import { CommentsSkeleton } from "@/components/skeletons";
 
 export function TaskComments({ taskId }: TaskCommentsProps) {
   const [comments, setComments] = useState<CommentItem[]>([]);
   const [value, setValue] = useState("");
   const [loading, setLoading] = useState(false);
+  const [fetching, setFetching] = useState(true); // true = loading until first fetch completes
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     fetch(`/api/tasks/${taskId}/comments`)
       .then((r) => r.json())
-      .then(setComments);
+      .then((data) => {
+        setComments(Array.isArray(data) ? data : []);
+        setFetching(false);
+      })
+      .catch(() => setFetching(false));
   }, [taskId]);
 
   useEffect(() => {
@@ -48,12 +54,13 @@ export function TaskComments({ taskId }: TaskCommentsProps) {
 
       {/* List */}
       <div className="flex-1 overflow-y-auto flex flex-col gap-3 pr-1">
-        {comments.length === 0 && (
+        {fetching && <CommentsSkeleton count={3} />}
+        {!fetching && comments.length === 0 && (
           <p className="text-xs text-muted-foreground text-center py-6">
             Sin comentarios todavía
           </p>
         )}
-        {comments.map((c) => (
+        {!fetching && comments.map((c) => (
           <div key={c.id} className="group flex flex-col gap-0.5">
             <div className="flex items-center justify-between gap-2">
               <span className="text-xs font-medium">{c.user.name || c.user.email}</span>

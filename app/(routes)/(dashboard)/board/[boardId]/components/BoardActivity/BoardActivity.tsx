@@ -11,13 +11,15 @@ import {
 import { Button } from "@/components/ui/button";
 import type { ActivityLog, BoardActivityProps } from "./BoardActivity.types";
 import { TYPE_ICON } from "./BoardActivity.constants";
+import { ActivitySkeleton } from "@/components/skeletons";
 
 export function BoardActivity({ boardId, open, onClose }: BoardActivityProps) {
   const [logs, setLogs] = useState<ActivityLog[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!open) return;
+    const t = setTimeout(() => setLoading(true), 0);
     const controller = new AbortController();
     fetch(`/api/boards/${boardId}/activity`, { signal: controller.signal })
       .then((r) => r.json())
@@ -26,7 +28,10 @@ export function BoardActivity({ boardId, open, onClose }: BoardActivityProps) {
         setLoading(false);
       })
       .catch(() => setLoading(false));
-    return () => controller.abort();
+    return () => {
+      clearTimeout(t);
+      controller.abort();
+    };
   }, [open, boardId]);
 
   return (
@@ -40,11 +45,7 @@ export function BoardActivity({ boardId, open, onClose }: BoardActivityProps) {
         </DialogHeader>
 
         <div className="overflow-y-auto max-h-[60vh] flex flex-col divide-y px-1">
-          {loading && (
-            <p className="text-sm text-muted-foreground text-center py-8">
-              Cargando...
-            </p>
-          )}
+          {loading && <ActivitySkeleton count={5} />}
           {!loading && logs.length === 0 && (
             <p className="text-sm text-muted-foreground text-center py-8">
               Sin actividad aún

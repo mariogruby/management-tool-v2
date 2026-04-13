@@ -8,10 +8,12 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { Subtask, TaskSubtasksProps } from "./TaskSubtasks.types";
 import { useBoardStore } from "../../store/useBoardStore";
+import { SubtasksSkeleton } from "@/components/skeletons";
 
 export function TaskSubtasks({ taskId, listId }: TaskSubtasksProps) {
   const updateTask = useBoardStore((s) => s.updateTask);
   const [subtasks, setSubtasks] = useState<Subtask[]>([]);
+  const [fetching, setFetching] = useState(true); // true = loading until first fetch completes
   const [adding, setAdding] = useState(false);
   const [newTitle, setNewTitle] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -21,7 +23,11 @@ export function TaskSubtasks({ taskId, listId }: TaskSubtasksProps) {
   useEffect(() => {
     fetch(`/api/tasks/${taskId}/subtasks`)
       .then((r) => r.json())
-      .then((data) => setSubtasks(Array.isArray(data) ? data : []));
+      .then((data) => {
+        setSubtasks(Array.isArray(data) ? data : []);
+        setFetching(false);
+      })
+      .catch(() => setFetching(false));
   }, [taskId]);
 
   useEffect(() => {
@@ -122,7 +128,8 @@ export function TaskSubtasks({ taskId, listId }: TaskSubtasksProps) {
       )}
 
       <div className="flex flex-col gap-1">
-        {subtasks.map((subtask) => (
+        {fetching && <SubtasksSkeleton count={3} />}
+        {!fetching && subtasks.map((subtask) => (
           <div
             key={subtask.id}
             className="group flex items-center gap-2 rounded-md px-2 py-1 hover:bg-muted/50 transition-colors"
@@ -166,7 +173,7 @@ export function TaskSubtasks({ taskId, listId }: TaskSubtasksProps) {
           </div>
         ))}
 
-        {adding ? (
+        {!fetching && adding ? (
           <div className="flex items-center gap-2 px-2">
             <div className="w-4 shrink-0" />
             <Input

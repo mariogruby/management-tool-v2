@@ -8,6 +8,7 @@ import { Kbd, KbdGroup } from "@/components/ui/kbd";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { SearchResults } from "./GlobalSearch.types";
+import { SearchResultsSkeleton } from "@/components/skeletons";
 
 const DEBOUNCE_MS = 300;
 
@@ -138,11 +139,7 @@ export function GlobalSearch() {
 
           {/* Results */}
           <div className="overflow-y-auto max-h-[60vh] flex flex-col py-1">
-            {loading && (
-              <p className="text-sm text-muted-foreground text-center py-8">
-                Buscando...
-              </p>
-            )}
+            {loading && <SearchResultsSkeleton count={4} />}
 
             {!loading && query.length >= 2 && !hasResults && (
               <p className="text-sm text-muted-foreground text-center py-8">
