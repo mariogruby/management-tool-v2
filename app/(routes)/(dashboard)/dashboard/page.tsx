@@ -9,6 +9,8 @@ import { RecentActivity } from "./components/RecentActivity/RecentActivity";
 import { AssignedToMe } from "./components/AssignedToMe/AssignedToMe";
 import { RecentBoards } from "./components/RecentBoards/RecentBoards";
 import { GlobalProgress } from "./components/GlobalProgress/GlobalProgress";
+import { WeeklyActivity } from "./components/WeeklyActivity/WeeklyActivity";
+import { Greeting } from "./components/Greeting/Greeting";
 
 export default async function DashboardPage() {
   const { userId } = await auth();
@@ -38,7 +40,11 @@ export default async function DashboardPage() {
   in7Days.setDate(now.getDate() + 7);
   in7Days.setHours(23, 59, 59, 999);
 
-  const [totalTasks, totalPending, overdue, completedThisWeek, upcomingTasks, recentActivity, assignedTasks] = await Promise.all([
+  const last7Days = new Date(now);
+  last7Days.setDate(now.getDate() - 6);
+  last7Days.setHours(0, 0, 0, 0);
+
+  const [totalTasks, totalPending, overdue, completedThisWeek, upcomingTasks, recentActivity, assignedTasks, completedLast7] = await Promise.all([
     db.task.count({
       where: { list: { boardId: { in: boardIds } } },
     }),
@@ -116,10 +122,29 @@ export default async function DashboardPage() {
         },
       },
     }),
+    db.task.findMany({
+      where: {
+        completed: true,
+        updatedAt: { gte: last7Days },
+        list: { boardId: { in: boardIds } },
+      },
+      select: { updatedAt: true },
+    }),
   ]);
+
+  // Construir array de los últimos 7 días con conteo de completadas
+  const weeklyDays = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(last7Days);
+    d.setDate(last7Days.getDate() + i);
+    const key = d.toISOString().slice(0, 10);
+    const count = completedLast7.filter((t) => t.updatedAt.toISOString().slice(0, 10) === key).length;
+    return { date: key, count };
+  });
 
   return (
     <div className="p-3 sm:p-6 flex flex-col gap-6">
+      <Greeting name={user.name} />
+
       <DashboardStats
         totalPending={totalPending}
         overdue={overdue}
@@ -136,6 +161,8 @@ export default async function DashboardPage() {
       <UpcomingTasks tasks={upcomingTasks} />
 
       <RecentActivity logs={recentActivity} />
+
+      <WeeklyActivity days={weeklyDays} />
 
       <AssignedToMe tasks={assignedTasks} />
 
