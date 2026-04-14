@@ -5,6 +5,7 @@ import { CreateBoardModal } from "./components/boards/CreateBoardModal/CreateBoa
 import { BoardList } from "./components/boards/BoardList/BoardList";
 import { DashboardStats } from "./components/DashboardStats/DashboardStats";
 import { UpcomingTasks } from "./components/UpcomingTasks/UpcomingTasks";
+import { RecentActivity } from "./components/RecentActivity/RecentActivity";
 
 export default async function DashboardPage() {
   const { userId } = await auth();
@@ -34,7 +35,7 @@ export default async function DashboardPage() {
   in7Days.setDate(now.getDate() + 7);
   in7Days.setHours(23, 59, 59, 999);
 
-  const [totalPending, overdue, completedThisWeek, upcomingTasks] = await Promise.all([
+  const [totalPending, overdue, completedThisWeek, upcomingTasks, recentActivity] = await Promise.all([
     db.task.count({
       where: {
         completed: false,
@@ -76,6 +77,19 @@ export default async function DashboardPage() {
         },
       },
     }),
+    db.activityLog.findMany({
+      where: { boardId: { in: boardIds } },
+      orderBy: { createdAt: "desc" },
+      take: 8,
+      select: {
+        id: true,
+        type: true,
+        message: true,
+        createdAt: true,
+        board: { select: { id: true, title: true } },
+        user: { select: { name: true } },
+      },
+    }),
   ]);
 
   return (
@@ -88,6 +102,8 @@ export default async function DashboardPage() {
       />
 
       <UpcomingTasks tasks={upcomingTasks} />
+
+      <RecentActivity logs={recentActivity} />
 
       <div>
         <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
