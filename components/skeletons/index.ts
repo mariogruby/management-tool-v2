@@ -5,3 +5,4 @@ export { ActivitySkeleton } from "./ActivitySkeleton";
 export { SearchResultsSkeleton } from "./SearchResultsSkeleton";
 export { BoardListSkeleton } from "./BoardListSkeleton";
 export { BoardPageSkeleton } from "./BoardPageSkeleton";
+export { DashboardSkeleton } from "./DashboardSkeleton";
