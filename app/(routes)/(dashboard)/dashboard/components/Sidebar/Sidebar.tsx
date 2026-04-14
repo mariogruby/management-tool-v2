@@ -1,3 +1,4 @@
+import { currentUser } from "@clerk/nextjs/server";
 import {
   Sidebar,
   SidebarContent,
@@ -6,10 +7,11 @@ import {
   SidebarHeader,
 } from "@/components/ui/sidebar";
 import { SidebarRoutes } from "../SidebarRoutes/SidebarRoutes";
-import { SidebarItem } from "../SidebarRoutes/SidebarItem/SidebarItem";
-import { Settings } from "lucide-react";
+import { SidebarUserFooter } from "../SidebarUserFooter/SidebarUserFooter";
 
-export function AppSidebar() {
+export async function AppSidebar() {
+  const user = await currentUser();
+
   return (
     <Sidebar>
       <SidebarHeader />
@@ -18,8 +20,14 @@ export function AppSidebar() {
         <SidebarRoutes />
         <SidebarGroup />
       </SidebarContent>
-      <SidebarFooter className="p-2">
-        <SidebarItem item={{ label: "Settings", href: "/dashboard/settings", icon: <Settings size={18} /> }} />
+      <SidebarFooter className="p-2 border-t">
+        {user && (
+          <SidebarUserFooter
+            name={user.fullName}
+            email={user.emailAddresses[0]?.emailAddress ?? ""}
+            imageUrl={user.imageUrl ?? null}
+          />
+        )}
       </SidebarFooter>
     </Sidebar>
   );
