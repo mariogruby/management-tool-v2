@@ -4,6 +4,7 @@ import db from "@/lib/db";
 import { CreateBoardModal } from "./components/boards/CreateBoardModal/CreateBoardModal";
 import { BoardList } from "./components/boards/BoardList/BoardList";
 import { DashboardStats } from "./components/DashboardStats/DashboardStats";
+import { UpcomingTasks } from "./components/UpcomingTasks/UpcomingTasks";
 
 export default async function DashboardPage() {
   const { userId } = await auth();
@@ -29,7 +30,11 @@ export default async function DashboardPage() {
   startOfWeek.setDate(now.getDate() - now.getDay() + (now.getDay() === 0 ? -6 : 1));
   startOfWeek.setHours(0, 0, 0, 0);
 
-  const [totalPending, overdue, completedThisWeek] = await Promise.all([
+  const in7Days = new Date(now);
+  in7Days.setDate(now.getDate() + 7);
+  in7Days.setHours(23, 59, 59, 999);
+
+  const [totalPending, overdue, completedThisWeek, upcomingTasks] = await Promise.all([
     db.task.count({
       where: {
         completed: false,
@@ -50,6 +55,27 @@ export default async function DashboardPage() {
         list: { boardId: { in: boardIds } },
       },
     }),
+    db.task.findMany({
+      where: {
+        completed: false,
+        dueDate: { gte: now, lte: in7Days },
+        list: { boardId: { in: boardIds } },
+      },
+      orderBy: { dueDate: "asc" },
+      select: {
+        id: true,
+        title: true,
+        completed: true,
+        dueDate: true,
+        priority: true,
+        list: {
+          select: {
+            title: true,
+            board: { select: { id: true, title: true } },
+          },
+        },
+      },
+    }),
   ]);
 
   return (
@@ -60,6 +86,8 @@ export default async function DashboardPage() {
         completedThisWeek={completedThisWeek}
         totalBoards={boards.length}
       />
+
+      <UpcomingTasks tasks={upcomingTasks} />
 
       <div>
         <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
