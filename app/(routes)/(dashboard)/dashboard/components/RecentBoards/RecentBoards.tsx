@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Clock, LayoutDashboard } from "lucide-react";
-import { Board, RecentBoardsProps } from "./recentBoards.types";
+import { Board, RecentBoardsProps } from "./RecentBoards.types";
 
 const STORAGE_KEY = "recent_boards";
 

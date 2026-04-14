@@ -8,6 +8,7 @@ import { UpcomingTasks } from "./components/UpcomingTasks/UpcomingTasks";
 import { RecentActivity } from "./components/RecentActivity/RecentActivity";
 import { AssignedToMe } from "./components/AssignedToMe/AssignedToMe";
 import { RecentBoards } from "./components/RecentBoards/RecentBoards";
+import { GlobalProgress } from "./components/GlobalProgress/GlobalProgress";
 
 export default async function DashboardPage() {
   const { userId } = await auth();
@@ -37,7 +38,10 @@ export default async function DashboardPage() {
   in7Days.setDate(now.getDate() + 7);
   in7Days.setHours(23, 59, 59, 999);
 
-  const [totalPending, overdue, completedThisWeek, upcomingTasks, recentActivity, assignedTasks] = await Promise.all([
+  const [totalTasks, totalPending, overdue, completedThisWeek, upcomingTasks, recentActivity, assignedTasks] = await Promise.all([
+    db.task.count({
+      where: { list: { boardId: { in: boardIds } } },
+    }),
     db.task.count({
       where: {
         completed: false,
@@ -121,6 +125,12 @@ export default async function DashboardPage() {
         overdue={overdue}
         completedThisWeek={completedThisWeek}
         totalBoards={boards.length}
+      />
+
+      <GlobalProgress
+        totalTasks={totalTasks}
+        completedTasks={totalTasks - totalPending}
+        completedThisWeek={completedThisWeek}
       />
 
       <UpcomingTasks tasks={upcomingTasks} />
