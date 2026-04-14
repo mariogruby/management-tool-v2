@@ -306,8 +306,11 @@ export function TaskModal({
                 <TaskLabels
                   taskId={currentTask.id}
                   boardId={boardId}
-                  activeLabels={currentTask.labels}
-                  onLabelsChange={setActiveLabels}
+                  activeLabels={activeLabels}
+                  onLabelsChange={(labels) => {
+                    setActiveLabels(labels);
+                    updateTask(currentListId, currentTask.id, { labels });
+                  }}
                 />
                 {!currentStartDate && !currentDueDate && (
                   <TaskDatePicker

@@ -102,12 +102,14 @@ export function TaskLabels({ taskId, boardId, activeLabels, onLabelsChange }: Ta
 
   const deleteLabel = async (labelId: string) => {
     await fetch(`/api/labels/label/${labelId}`, { method: "DELETE" });
-    setLabels((prev) => prev.filter((l) => l.id !== labelId));
-    setActiveIds((prev) => {
-      const n = new Set(prev);
-      n.delete(labelId);
-      return n;
-    });
+    const nextLabels = labels.filter((l) => l.id !== labelId);
+    setLabels(nextLabels);
+    const nextIds = new Set(activeIds);
+    nextIds.delete(labelId);
+    setActiveIds(nextIds);
+    if (onLabelsChange) {
+      onLabelsChange(nextLabels.filter((l) => nextIds.has(l.id)).map((l) => ({ label: l })));
+    }
   };
 
   return (
