@@ -7,6 +7,7 @@ import { DashboardStats } from "./components/DashboardStats/DashboardStats";
 import { UpcomingTasks } from "./components/UpcomingTasks/UpcomingTasks";
 import { RecentActivity } from "./components/RecentActivity/RecentActivity";
 import { AssignedToMe } from "./components/AssignedToMe/AssignedToMe";
+import { RecentBoards } from "./components/RecentBoards/RecentBoards";
 
 export default async function DashboardPage() {
   const { userId } = await auth();
@@ -133,7 +134,10 @@ export default async function DashboardPage() {
           <h2 className="text-lg font-semibold">Mis boards</h2>
           <CreateBoardModal />
         </div>
-        <BoardList boards={boards} />
+        <RecentBoards boards={boards} />
+        <div className="mt-4">
+          <BoardList boards={boards} />
+        </div>
       </div>
     </div>
   );

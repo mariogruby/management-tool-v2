@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import db from "@/lib/db";
 import { BoardContent } from "./components/BoardContent/BoardContent";
 import { BoardHeader } from "./components/BoardHeader/BoardHeader";
+import { BoardVisitTracker } from "./components/BoardVisitTracker/BoardVisitTracker";
 
 interface BoardPageProps {
   params: Promise<{ boardId: string }>;
@@ -67,6 +68,7 @@ export default async function BoardPage({ params }: BoardPageProps) {
 
   return (
     <div className="flex flex-col h-full p-3 sm:p-6 gap-4 sm:gap-6 min-w-0">
+      <BoardVisitTracker boardId={board.id} />
       <BoardHeader boardId={board.id} title={board.title} />
       <BoardContent
         lists={board.list}
