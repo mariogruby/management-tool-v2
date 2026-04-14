@@ -32,7 +32,7 @@ export default async function LayoutDashboard({
     <SidebarProvider>
       <BoardsStoreInitializer boards={boards} ownUserId={dbUserId} />
       <AppSidebar />
-      <main className="flex flex-col flex-1 min-h-screen w-full overflow-auto">
+      <main className="flex flex-col flex-1 min-h-svh w-full overflow-auto min-w-0">
         <Navbar />
         {children}
       </main>

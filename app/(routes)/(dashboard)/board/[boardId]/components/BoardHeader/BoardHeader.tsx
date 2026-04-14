@@ -90,7 +90,7 @@ export function BoardHeader({ boardId, title }: BoardHeaderProps) {
         onClose={() => setActivityOpen(false)}
       />
 
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex items-center justify-between gap-2 min-w-0">
         {isEditing ? (
           <Input
             ref={inputRef}
@@ -102,19 +102,19 @@ export function BoardHeader({ boardId, title }: BoardHeaderProps) {
               if (e.key === "Escape") cancelEditing();
             }}
             disabled={loading}
-            className="text-2xl font-bold w-auto rounded-xl"
+            className="text-xl sm:text-2xl font-bold w-auto rounded-xl"
             autoFocus
           />
         ) : (
           <h1
-            className="text-2xl font-bold cursor-pointer hover:opacity-75 transition-opacity"
+            className="text-xl sm:text-2xl font-bold cursor-pointer hover:opacity-75 transition-opacity truncate"
             onClick={startEditing}
           >
             {value}
           </h1>
         )}
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 sm:gap-2 shrink-0">
           <Button
             variant="outline"
             size="sm"
@@ -122,7 +122,7 @@ export function BoardHeader({ boardId, title }: BoardHeaderProps) {
             disabled={loading}
           >
             <Activity size={15} />
-            Actividad
+            <span className="hidden sm:inline">Actividad</span>
           </Button>
           <Button
             variant="outline"
@@ -131,7 +131,7 @@ export function BoardHeader({ boardId, title }: BoardHeaderProps) {
             disabled={loading}
           >
             <Users size={15} />
-            Miembros
+            <span className="hidden sm:inline">Miembros</span>
           </Button>
 
           <DropdownMenu>

@@ -24,8 +24,8 @@ export default async function BoardsPage() {
   });
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between mb-6">
+    <div className="p-3 sm:p-6">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
         <h1 className="text-2xl font-bold">Mis Boards y Boards terceros</h1>
         <CreateBoardModal />
       </div>

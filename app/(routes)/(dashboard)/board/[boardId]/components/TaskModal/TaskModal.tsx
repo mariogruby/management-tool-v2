@@ -88,6 +88,7 @@ export function TaskModal({
   const [editingTitle, setEditingTitle] = useState(false);
   const [editingDescription, setEditingDescription] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [mobileTab, setMobileTab] = useState<"details" | "comments">("details");
 
   // Reset all local state when navigating to a different task
   useEffect(() => {
@@ -247,13 +248,29 @@ export function TaskModal({
           </div>
         </DialogHeader>
 
+        {/* Mobile tab switcher */}
+        <div className="flex sm:hidden border-b">
+          <button
+            className={`flex-1 py-2 text-sm font-medium transition-colors ${mobileTab === "details" ? "border-b-2 border-primary text-primary" : "text-muted-foreground"}`}
+            onClick={() => setMobileTab("details")}
+          >
+            Detalles
+          </button>
+          <button
+            className={`flex-1 py-2 text-sm font-medium transition-colors ${mobileTab === "comments" ? "border-b-2 border-primary text-primary" : "text-muted-foreground"}`}
+            onClick={() => setMobileTab("comments")}
+          >
+            Comentarios
+          </button>
+        </div>
+
         <div
           key={currentTask.id}
-          className="flex divide-x overflow-hidden"
+          className="flex sm:divide-x overflow-hidden"
           style={{ maxHeight: "70vh" }}
         >
           {/* Left — task details */}
-          <div className="flex-1 overflow-y-auto px-4 pt-2 pb-6 flex flex-col gap-4">
+          <div className={`flex-1 overflow-y-auto px-4 pt-2 pb-6 flex flex-col gap-4 ${mobileTab !== "details" ? "hidden sm:flex" : ""}`}>
             <div className="flex items-start gap-2">
               <button
                 onClick={toggleCompleted}
@@ -415,7 +432,7 @@ export function TaskModal({
           </div>
 
           {/* Right — comments */}
-          <div className="w-72 shrink-0 flex flex-col px-4 pt-2 pb-4 min-h-0">
+          <div className={`sm:w-72 sm:shrink-0 flex flex-col px-4 pt-2 pb-4 min-h-0 ${mobileTab !== "comments" ? "hidden sm:flex" : "flex-1"}`}>
             <TaskComments taskId={currentTask.id} />
           </div>
         </div>

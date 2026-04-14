@@ -66,7 +66,7 @@ export default async function BoardPage({ params }: BoardPageProps) {
   ];
 
   return (
-    <div className="flex flex-col h-full p-6 gap-6">
+    <div className="flex flex-col h-full p-3 sm:p-6 gap-4 sm:gap-6 min-w-0">
       <BoardHeader boardId={board.id} title={board.title} />
       <BoardContent
         lists={board.list}
