@@ -20,7 +20,7 @@ export function GlobalProgress({
         <span className="text-2xl font-bold tabular-nums">{pct}%</span>
       </div>
 
-      <Progress value={pct} className="h-2" />
+      <Progress value={pct} className="h-2" aria-valuetext={`${pct}%`} />
 
       <div className="flex items-center justify-between text-xs text-muted-foreground">
         <span>
