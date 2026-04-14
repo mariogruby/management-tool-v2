@@ -191,7 +191,7 @@ export function BoardContent({
         })),
       );
 
-      // Find the list where the task ended up
+      // Find the list where the task ended up  
       const toListId =
         lists.find((l) => l.tasks.some((t) => t.id === active.id))?.id ?? null;
 
