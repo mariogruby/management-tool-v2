@@ -99,7 +99,7 @@ export default function CalendarPage() {
   const daysWithTasksCount = Object.keys(tasksByDay).length;
 
   return (
-    <div className="flex flex-col h-full p-6 gap-6">
+    <div className="flex flex-col h-full p-3 sm:p-6 gap-4 sm:gap-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Calendario</h1>
         {loading && (
@@ -107,7 +107,7 @@ export default function CalendarPage() {
         )}
       </div>
 
-      <div className="flex gap-6 flex-1 min-h-0">
+      <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 flex-1 min-h-0">
         {/* Calendar grid  */}
         <div className="flex-1 min-w-0 flex flex-col gap-3">
           {/* Month nav */}
@@ -152,7 +152,7 @@ export default function CalendarPage() {
                   key={key}
                   onClick={() => setSelected(isSelected ? null : date)}
                   className={cn(
-                    "flex flex-col items-center rounded-lg border p-1.5 min-h-16 transition-colors text-left",
+                    "flex flex-col items-center rounded-lg border p-1 sm:p-1.5 min-h-10 sm:min-h-16 transition-colors text-left",
                     isSelected
                       ? "bg-primary text-primary-foreground border-primary"
                       : isToday
@@ -173,10 +173,15 @@ export default function CalendarPage() {
 
                   {dayTasks.length > 0 && (
                     <div className="flex flex-col gap-0.5 w-full mt-1">
+                      {/* Móvil: solo punto indicador */}
+                      <span className={cn(
+                        "sm:hidden w-1.5 h-1.5 rounded-full mx-auto shrink-0",
+                        isSelected ? "bg-primary-foreground" : "bg-primary",
+                      )} />
                       {pending > 0 && (
                         <span
                           className={cn(
-                            "text-[10px] leading-none px-1 py-0.5 rounded font-medium",
+                            "hidden sm:block text-[10px] leading-none px-1 py-0.5 rounded font-medium",
                             isSelected
                               ? "bg-primary-foreground/20 text-primary-foreground"
                               : "bg-primary/10 text-primary",
@@ -188,7 +193,7 @@ export default function CalendarPage() {
                       {done > 0 && (
                         <span
                           className={cn(
-                            "text-[10px] leading-none px-1 py-0.5 rounded",
+                            "hidden sm:block text-[10px] leading-none px-1 py-0.5 rounded",
                             isSelected
                               ? "bg-primary-foreground/10 text-primary-foreground/70"
                               : "bg-muted-foreground/10 text-muted-foreground",
@@ -204,9 +209,10 @@ export default function CalendarPage() {
             })}
           </div>
         </div>
-        <Separator orientation="vertical" />
+        <Separator className="sm:hidden" />
+        <Separator orientation="vertical" className="hidden sm:block" />
         {/* Day detail panel */}
-        <div className="w-72 shrink-0 flex flex-col gap-3">
+        <div className="sm:w-72 sm:shrink-0 flex flex-col gap-3">
           {selected ? (
             <>
               <div className="flex items-center justify-between">
