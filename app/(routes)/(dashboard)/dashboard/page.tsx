@@ -6,6 +6,7 @@ import { BoardList } from "./components/boards/BoardList/BoardList";
 import { DashboardStats } from "./components/DashboardStats/DashboardStats";
 import { UpcomingTasks } from "./components/UpcomingTasks/UpcomingTasks";
 import { RecentActivity } from "./components/RecentActivity/RecentActivity";
+import { AssignedToMe } from "./components/AssignedToMe/AssignedToMe";
 
 export default async function DashboardPage() {
   const { userId } = await auth();
@@ -35,7 +36,7 @@ export default async function DashboardPage() {
   in7Days.setDate(now.getDate() + 7);
   in7Days.setHours(23, 59, 59, 999);
 
-  const [totalPending, overdue, completedThisWeek, upcomingTasks, recentActivity] = await Promise.all([
+  const [totalPending, overdue, completedThisWeek, upcomingTasks, recentActivity, assignedTasks] = await Promise.all([
     db.task.count({
       where: {
         completed: false,
@@ -90,6 +91,26 @@ export default async function DashboardPage() {
         user: { select: { name: true } },
       },
     }),
+    db.task.findMany({
+      where: {
+        assignees: { some: { userId: user.id } },
+        list: { boardId: { in: boardIds } },
+      },
+      orderBy: [{ completed: "asc" }, { dueDate: "asc" }],
+      select: {
+        id: true,
+        title: true,
+        completed: true,
+        priority: true,
+        dueDate: true,
+        list: {
+          select: {
+            title: true,
+            board: { select: { id: true, title: true } },
+          },
+        },
+      },
+    }),
   ]);
 
   return (
@@ -104,6 +125,8 @@ export default async function DashboardPage() {
       <UpcomingTasks tasks={upcomingTasks} />
 
       <RecentActivity logs={recentActivity} />
+
+      <AssignedToMe tasks={assignedTasks} />
 
       <div>
         <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
