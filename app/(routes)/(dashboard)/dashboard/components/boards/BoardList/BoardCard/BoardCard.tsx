@@ -1,6 +1,20 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
-import { Users } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { MoreHorizontal, ExternalLink, Pencil, Trash2, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { toast } from "sonner";
+import { useBoardsStore } from "@/store/useBoardsStore";
 import { BoardCardProps } from "./BoardCard.types";
 
 function timeAgo(date: Date): string {
@@ -17,44 +31,142 @@ function timeAgo(date: Date): string {
 
 export function BoardCard({ board }: BoardCardProps) {
   const { id, title, color, updatedAt, isOwner, totalTasks, completedTasks, totalLists } = board;
-  const pct = totalTasks === 0 ? 0 : Math.round((completedTasks / totalTasks) * 100);
-  const initial = title.charAt(0).toUpperCase();
+  const router = useRouter();
+  const renameBoard = useBoardsStore((s) => s.renameBoard);
+  const removeBoard = useBoardsStore((s) => s.removeBoard);
 
+  const [isRenaming, setIsRenaming] = useState(false);
+  const [renameValue, setRenameValue] = useState(title);
+  const [currentTitle, setCurrentTitle] = useState(title);
+  const [loading, setLoading] = useState(false);
+
+  const pct = totalTasks === 0 ? 0 : Math.round((completedTasks / totalTasks) * 100);
+  const initial = currentTitle.charAt(0).toUpperCase();
   const hasColor = !!color;
   const textColor = hasColor ? "text-white" : "text-foreground";
   const mutedTextColor = hasColor ? "text-white/70" : "text-muted-foreground";
 
+  const saveRename = async () => {
+    const trimmed = renameValue.trim();
+    if (!trimmed || trimmed === currentTitle) {
+      setRenameValue(currentTitle);
+      setIsRenaming(false);
+      return;
+    }
+    setLoading(true);
+    const res = await fetch(`/api/boards/updateBoard/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title: trimmed }),
+    });
+    if (res.ok) {
+      renameBoard(id, trimmed);
+      setCurrentTitle(trimmed);
+      toast.success("Board renombrado");
+    } else {
+      setRenameValue(currentTitle);
+      toast.error("Error al renombrar el board");
+    }
+    setIsRenaming(false);
+    setLoading(false);
+  };
+
+  const handleDelete = async () => {
+    setLoading(true);
+    const res = await fetch(`/api/boards/deleteBoard/${id}`, { method: "DELETE" });
+    if (res.ok) {
+      removeBoard(id);
+      router.refresh();
+      toast.success("Board eliminado");
+    } else {
+      toast.error("Error al eliminar el board");
+      setLoading(false);
+    }
+  };
+
   return (
-    <Link href={`/board/${id}`} className="group block">
-      <div
-        className="relative flex flex-col rounded-xl border overflow-hidden transition-all duration-200 hover:shadow-md hover:-translate-y-0.5"
-        style={hasColor ? { backgroundColor: color! } : undefined}
-      >
-        {/* Header */}
-        <div className={`flex items-start justify-between p-4 pb-3 ${!hasColor ? "bg-muted/40" : ""}`}>
-          <div
-            className={`w-9 h-9 rounded-lg flex items-center justify-center text-base font-bold shrink-0 ${
-              hasColor ? "bg-white/20 text-white" : "bg-background text-foreground"
-            }`}
-          >
-            {initial}
-          </div>
+    <div
+      className="group relative flex flex-col rounded-xl border overflow-hidden transition-all duration-200 hover:shadow-md hover:-translate-y-0.5"
+      style={hasColor ? { backgroundColor: color! } : undefined}
+    >
+      {/* Header */}
+      <div className={`flex items-start justify-between p-4 pb-3 ${!hasColor ? "bg-muted/40" : ""}`}>
+        <div
+          className={`w-9 h-9 rounded-lg flex items-center justify-center text-base font-bold shrink-0 ${
+            hasColor ? "bg-white/20 text-white" : "bg-background text-foreground"
+          }`}
+        >
+          {initial}
+        </div>
+
+        <div className="flex items-center gap-1.5 shrink-0">
           {!isOwner && (
             <Badge
               variant="secondary"
-              className={`text-[10px] px-1.5 py-0 h-5 shrink-0 ${hasColor ? "bg-white/20 text-white border-0" : ""}`}
+              className={`text-[10px] px-1.5 py-0 h-5 ${hasColor ? "bg-white/20 text-white border-0" : ""}`}
             >
               <Users size={9} className="mr-1" />
               Miembro
             </Badge>
           )}
-        </div>
 
-        {/* Title + meta */}
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              onClick={(e) => e.stopPropagation()}
+              className={`rounded-md p-1 transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100 ${
+                hasColor
+                  ? "text-white/70 hover:text-white hover:bg-white/10"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted"
+              }`}
+              disabled={loading}
+            >
+              <MoreHorizontal size={15} />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
+              <DropdownMenuItem onClick={() => router.push(`/board/${id}`)}>
+                <ExternalLink size={14} />
+                Abrir
+              </DropdownMenuItem>
+              {isOwner && (
+                <>
+                  <DropdownMenuItem onClick={() => { setRenameValue(currentTitle); setIsRenaming(true); }}>
+                    <Pencil size={14} />
+                    Renombrar
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem variant="destructive" onClick={handleDelete} disabled={loading}>
+                    <Trash2 size={14} />
+                    Eliminar
+                  </DropdownMenuItem>
+                </>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </div>
+
+      {/* Title + meta — clickable area */}
+      <Link href={`/board/${id}`} className="group flex-1 flex flex-col">
         <div className="px-4 pb-3 flex flex-col gap-1">
-          <h3 className={`font-semibold text-sm leading-tight line-clamp-2 ${textColor}`}>
-            {title}
-          </h3>
+          {isRenaming ? (
+            <Input
+              value={renameValue}
+              onChange={(e) => setRenameValue(e.target.value)}
+              onBlur={saveRename}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") saveRename();
+                if (e.key === "Escape") { setRenameValue(currentTitle); setIsRenaming(false); }
+              }}
+              onClick={(e) => e.preventDefault()}
+              autoFocus
+              disabled={loading}
+              className="h-7 text-sm font-semibold px-1 py-0"
+            />
+          ) : (
+            <h3 className={`font-semibold text-sm leading-tight line-clamp-2 ${textColor}`}>
+              {currentTitle}
+            </h3>
+          )}
           <p className={`text-xs ${mutedTextColor}`}>
             {totalLists} lista{totalLists !== 1 ? "s" : ""} · {totalTasks} tarea{totalTasks !== 1 ? "s" : ""}
           </p>
@@ -73,7 +185,7 @@ export function BoardCard({ board }: BoardCardProps) {
             <span>{timeAgo(updatedAt)}</span>
           </div>
         </div>
-      </div>
-    </Link>
+      </Link>
+    </div>
   );
 }
