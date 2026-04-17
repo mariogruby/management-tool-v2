@@ -1,5 +1,5 @@
-import { BoardModel } from "@/lib/generated/prisma/models/Board";
+import { BoardWithStats } from "./BoardCard/BoardCard.types";
 
 export type BoardListProps = {
-  boards: BoardModel[];
+  boards: BoardWithStats[];
 };

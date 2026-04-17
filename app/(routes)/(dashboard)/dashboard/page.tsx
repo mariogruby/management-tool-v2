@@ -19,7 +19,7 @@ export default async function DashboardPage() {
   const user = await db.user.findUnique({ where: { clerkId: userId } });
   if (!user) redirect("/sign-in");
 
-  const boards = await db.board.findMany({
+  const rawBoards = await db.board.findMany({
     where: {
       OR: [
         { userId: user.id },
@@ -27,7 +27,31 @@ export default async function DashboardPage() {
       ],
     },
     orderBy: { createdAt: "desc" },
+    select: {
+      id: true,
+      title: true,
+      color: true,
+      updatedAt: true,
+      userId: true,
+      list: {
+        select: {
+          _count: { select: { tasks: true } },
+          tasks: { select: { completed: true } },
+        },
+      },
+    },
   });
+
+  const boards = rawBoards.map((b) => ({
+    id: b.id,
+    title: b.title,
+    color: b.color,
+    updatedAt: b.updatedAt,
+    isOwner: b.userId === user.id,
+    totalTasks: b.list.reduce((acc, l) => acc + l._count.tasks, 0),
+    completedTasks: b.list.reduce((acc, l) => acc + l.tasks.filter((t) => t.completed).length, 0),
+    totalLists: b.list.length,
+  }));
 
   const boardIds = boards.map((b) => b.id);
 
