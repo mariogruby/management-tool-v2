@@ -149,19 +149,23 @@ export default async function DashboardPage() {
     db.task.findMany({
       where: {
         completed: true,
-        updatedAt: { gte: last7Days },
+        completedAt: { gte: last7Days },
         list: { boardId: { in: boardIds } },
       },
-      select: { updatedAt: true },
+      select: { completedAt: true },
     }),
   ]);
+
+  // Formatear fecha en zona local (YYYY-MM-DD) sin conversión UTC
+  const toLocalKey = (d: Date) =>
+    `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 
   // Construir array de los últimos 7 días con conteo de completadas
   const weeklyDays = Array.from({ length: 7 }, (_, i) => {
     const d = new Date(last7Days);
     d.setDate(last7Days.getDate() + i);
-    const key = d.toISOString().slice(0, 10);
-    const count = completedLast7.filter((t) => t.updatedAt.toISOString().slice(0, 10) === key).length;
+    const key = toLocalKey(d);
+    const count = completedLast7.filter((t) => t.completedAt && toLocalKey(t.completedAt) === key).length;
     return { date: key, count };
   });
 

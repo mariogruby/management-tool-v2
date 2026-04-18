@@ -41,7 +41,10 @@ export async function PATCH(
       ...(description !== undefined && {
         description: description.trim() || null,
       }),
-      ...(completed !== undefined && { completed }),
+      ...(completed !== undefined && {
+        completed,
+        completedAt: completed ? new Date() : null,
+      }),
       ...(startDate !== undefined && {
         startDate: startDate ? new Date(startDate) : null,
       }),
