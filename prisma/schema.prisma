@@ -51,6 +51,7 @@ model Board {
   title       String
   description String?
   color       String?
+  links       Json?
 
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)

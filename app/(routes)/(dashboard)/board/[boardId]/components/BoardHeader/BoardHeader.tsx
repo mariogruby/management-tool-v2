@@ -16,9 +16,10 @@ import { toast } from "sonner";
 import { BoardHeaderProps } from "./BoardHeader.types";
 import { BoardMembers } from "../BoardMembers/BoardMembers";
 import { BoardActivity } from "../BoardActivity/BoardActivity";
+import { BoardLinks } from "../BoardLinks/BoardLinks";
 import { ConfirmModal } from "@/components/Shared/ModalDeleteConfirmation/ModalDeleteConfirmation";
 
-export function BoardHeader({ boardId, title }: BoardHeaderProps) {
+export function BoardHeader({ boardId, title, isOwner, initialLinks }: BoardHeaderProps) {
   const router = useRouter();
   const renameBoard = useBoardsStore((s) => s.renameBoard);
   const removeBoard = useBoardsStore((s) => s.removeBoard);
@@ -126,6 +127,7 @@ export function BoardHeader({ boardId, title }: BoardHeaderProps) {
         )}
 
         <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+          <BoardLinks boardId={boardId} isOwner={isOwner} initialLinks={initialLinks} />
           <Button
             variant="outline"
             size="sm"

@@ -66,10 +66,12 @@ export default async function BoardPage({ params }: BoardPageProps) {
     ...memberUsers.filter((m) => !seen.has(m.id) && seen.add(m.id)),
   ];
 
+  const initialLinks = Array.isArray(board.links) ? (board.links as { id: string; label: string; url: string }[]) : [];
+
   return (
     <div className="flex flex-col h-full p-3 sm:p-6 gap-4 sm:gap-6 min-w-0">
       <BoardVisitTracker boardId={board.id} />
-      <BoardHeader boardId={board.id} title={board.title} />
+      <BoardHeader boardId={board.id} title={board.title} isOwner={isOwner} initialLinks={initialLinks} />
       <BoardContent
         lists={board.list}
         boardId={board.id}

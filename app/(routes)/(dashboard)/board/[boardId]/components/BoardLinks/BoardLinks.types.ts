@@ -1,8 +1,7 @@
 import type { BoardLink } from "@/app/api/boards/[boardId]/links/route";
 
-export type BoardHeaderProps = {
+export interface BoardLinksProps {
   boardId: string;
-  title: string;
   isOwner: boolean;
   initialLinks: BoardLink[];
-};
+}
