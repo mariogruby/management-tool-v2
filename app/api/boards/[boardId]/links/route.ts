@@ -41,7 +41,7 @@ export async function PUT(req: Request, { params }: Params) {
   const links: BoardLink[] = await req.json();
   const updated = await db.board.update({
     where: { id: boardId },
-    data: { links },
+    data: { links: links as unknown as object[] },
     select: { links: true },
   });
 
