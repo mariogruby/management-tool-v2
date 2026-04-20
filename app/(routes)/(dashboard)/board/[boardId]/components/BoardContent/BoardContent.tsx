@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useBoardPolling } from "@/hooks/use-board-polling";
 import { Progress } from "@/components/ui/progress";
 import {
   DndContext,
@@ -77,6 +78,8 @@ export function BoardContent({
   isOwner,
   boardUsers,
 }: BoardContentProps) {
+  useBoardPolling();
+
   const { lists, setLists, reorderLists, moveTask } = useBoardStore();
   const [activeTask, setActiveTask] = useState<TaskModel | null>(null);
   const [activeList, setActiveList] = useState<ListWithTasks | null>(null);
