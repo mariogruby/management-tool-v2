@@ -1,6 +1,6 @@
 import { NumberTicker } from "@/components/ui/number-ticker";
 import { stats } from "./StatsSection.data";
-import { Reveal } from "@/components/Shared/Reveal";
+import { Reveal } from "@/components/Shared/Reveal/Reveal";
 
 export function StatsSection() {
   return (

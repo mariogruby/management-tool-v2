@@ -1,6 +1,6 @@
 import { Marquee } from "@/components/ui/marquee";
 import { features } from "./MarqueeSection.data";
-import { Reveal } from "@/components/Shared/Reveal";
+import { Reveal } from "@/components/Shared/Reveal/Reveal";
 
 function FeatureChip({
   icon,

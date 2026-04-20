@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Member, Invitation, Props } from "./BoardMembers.types";
+import { ConfirmModal } from "@/components/Shared/ModalDeleteConfirmation/ModalDeleteConfirmation";
 
 export function BoardMembers({ boardId, open, onClose }: Props) {
   const [members, setMembers] = useState<Member[]>([]);
@@ -19,6 +20,7 @@ export function BoardMembers({ boardId, open, onClose }: Props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [confirmMember, setConfirmMember] = useState<Member | null>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -117,7 +119,7 @@ export function BoardMembers({ boardId, open, onClose }: Props) {
                   </div>
                   {isOwner && (
                     <button
-                      onClick={() => removeMember(member.id)}
+                      onClick={() => setConfirmMember(member)}
                       className="shrink-0 opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-all"
                     >
                       <Trash2 size={13} />
@@ -161,6 +163,18 @@ export function BoardMembers({ boardId, open, onClose }: Props) {
           )}
         </div>
       </DialogContent>
+      <ConfirmModal
+        open={!!confirmMember}
+        title="Eliminar miembro"
+        description={`¿Eliminar a "${confirmMember?.user.name ?? confirmMember?.user.email}" del board? Perderá acceso inmediatamente.`}
+        confirmLabel="Eliminar"
+        variant="warning"
+        onConfirm={() => {
+          if (confirmMember) removeMember(confirmMember.id);
+          setConfirmMember(null);
+        }}
+        onCancel={() => setConfirmMember(null)}
+      />
     </Dialog>
   );
 }

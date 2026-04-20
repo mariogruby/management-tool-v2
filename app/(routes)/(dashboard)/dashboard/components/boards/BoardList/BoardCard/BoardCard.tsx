@@ -16,6 +16,7 @@ import {
 import { toast } from "sonner";
 import { useBoardsStore } from "@/store/useBoardsStore";
 import { BoardCardProps } from "./BoardCard.types";
+import { ConfirmModal } from "@/components/Shared/ModalDeleteConfirmation/ModalDeleteConfirmation";
 
 function timeAgo(date: Date): string {
   const diffMs = Date.now() - new Date(date).getTime();
@@ -39,6 +40,7 @@ export function BoardCard({ board }: BoardCardProps) {
   const [renameValue, setRenameValue] = useState(title);
   const [currentTitle, setCurrentTitle] = useState(title);
   const [loading, setLoading] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   const pct = totalTasks === 0 ? 0 : Math.round((completedTasks / totalTasks) * 100);
   const initial = currentTitle.charAt(0).toUpperCase();
@@ -134,7 +136,7 @@ export function BoardCard({ board }: BoardCardProps) {
                     Renombrar
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem variant="destructive" onClick={handleDelete} disabled={loading}>
+                  <DropdownMenuItem variant="destructive" onClick={() => setConfirmDelete(true)} disabled={loading}>
                     <Trash2 size={14} />
                     Eliminar
                   </DropdownMenuItem>
@@ -186,6 +188,15 @@ export function BoardCard({ board }: BoardCardProps) {
           </div>
         </div>
       </Link>
+      <ConfirmModal
+        open={confirmDelete}
+        title="Eliminar board"
+        description={`¿Eliminar "${currentTitle}"? Se perderán todas las listas y tareas. Esta acción no se puede deshacer.`}
+        confirmLabel="Eliminar"
+        loading={loading}
+        onConfirm={handleDelete}
+        onCancel={() => setConfirmDelete(false)}
+      />
     </div>
   );
 }

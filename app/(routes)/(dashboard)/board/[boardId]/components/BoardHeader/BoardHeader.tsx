@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import { BoardHeaderProps } from "./BoardHeader.types";
 import { BoardMembers } from "../BoardMembers/BoardMembers";
 import { BoardActivity } from "../BoardActivity/BoardActivity";
+import { ConfirmModal } from "@/components/Shared/ModalDeleteConfirmation/ModalDeleteConfirmation";
 
 export function BoardHeader({ boardId, title }: BoardHeaderProps) {
   const router = useRouter();
@@ -28,6 +29,7 @@ export function BoardHeader({ boardId, title }: BoardHeaderProps) {
   const [loading, setLoading] = useState(false);
   const [membersOpen, setMembersOpen] = useState(false);
   const [activityOpen, setActivityOpen] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const startEditing = () => {
@@ -79,6 +81,15 @@ export function BoardHeader({ boardId, title }: BoardHeaderProps) {
 
   return (
     <>
+      <ConfirmModal
+        open={confirmDelete}
+        title="Eliminar board"
+        description={`¿Eliminar "${savedTitle}"? Se perderán todas las listas y tareas. Esta acción no se puede deshacer.`}
+        confirmLabel="Eliminar"
+        loading={loading}
+        onConfirm={handleDelete}
+        onCancel={() => setConfirmDelete(false)}
+      />
       <BoardMembers
         boardId={boardId}
         open={membersOpen}
@@ -148,7 +159,7 @@ export function BoardHeader({ boardId, title }: BoardHeaderProps) {
               </DropdownMenuItem>
               <DropdownMenuItem
                 variant="destructive"
-                onClick={handleDelete}
+                onClick={() => setConfirmDelete(true)}
                 disabled={loading}
               >
                 <Trash2 size={14} />

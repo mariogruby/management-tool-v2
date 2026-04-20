@@ -11,10 +11,12 @@ import {
 import { toast } from "sonner";
 import { useBoardStore } from "../../store/useBoardStore";
 import { TaskActionsProps } from "./TaskActions.types";
+import { ConfirmModal } from "@/components/Shared/ModalDeleteConfirmation/ModalDeleteConfirmation";
 
 export function TaskActions({ taskId, listId }: TaskActionsProps) {
   const removeTask = useBoardStore((s) => s.removeTask);
   const [loading, setLoading] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   const handleDelete = async () => {
     setLoading(true);
@@ -29,6 +31,16 @@ export function TaskActions({ taskId, listId }: TaskActionsProps) {
   };
 
   return (
+    <>
+    <ConfirmModal
+      open={confirmDelete}
+      title="Eliminar tarea"
+      description="¿Eliminar esta tarea? Se perderán todos sus comentarios, adjuntos y subtareas."
+      confirmLabel="Eliminar"
+      loading={loading}
+      onConfirm={handleDelete}
+      onCancel={() => setConfirmDelete(false)}
+    />
     <DropdownMenu>
       <DropdownMenuTrigger
         className="p-1 rounded-md text-muted-foreground opacity-0 group-hover:opacity-100 hover:bg-muted transition"
@@ -39,7 +51,7 @@ export function TaskActions({ taskId, listId }: TaskActionsProps) {
       <DropdownMenuContent align="end">
         <DropdownMenuItem
           variant="destructive"
-          onClick={handleDelete}
+          onClick={() => setConfirmDelete(true)}
           disabled={loading}
         >
           <Trash2 size={14} />
@@ -47,5 +59,6 @@ export function TaskActions({ taskId, listId }: TaskActionsProps) {
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
+    </>
   );
 }

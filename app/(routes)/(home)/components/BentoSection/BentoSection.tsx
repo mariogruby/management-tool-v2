@@ -24,7 +24,7 @@ import {
   highlighted,
   subtasks,
 } from "./BentoSection.data";
-import { Reveal } from "@/components/Shared/Reveal";
+import { Reveal } from "@/components/Shared/Reveal/Reveal";
 
 // ── Kanban background — Marquee of task cards ──────────────────────────────
 

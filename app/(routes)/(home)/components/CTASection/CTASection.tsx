@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { InteractiveHoverButton } from "@/components/ui/interactive-hover-button";
-import { Reveal } from "@/components/Shared/Reveal";
+import { Reveal } from "@/components/Shared/Reveal/Reveal";
 
 export function CTASection() {
   return (

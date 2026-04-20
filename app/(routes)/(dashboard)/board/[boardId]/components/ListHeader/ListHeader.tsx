@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { useBoardStore } from "../../store/useBoardStore";
 import { ListHeaderProps } from "./ListHeader.types";
+import { ConfirmModal } from "@/components/Shared/ModalDeleteConfirmation/ModalDeleteConfirmation";
 
 export function ListHeader({ listId, title, taskCount }: ListHeaderProps) {
   const renameList = useBoardStore((s) => s.renameList);
@@ -21,6 +22,7 @@ export function ListHeader({ listId, title, taskCount }: ListHeaderProps) {
   const [value, setValue] = useState(title);
   const [savedTitle, setSavedTitle] = useState(title);
   const [loading, setLoading] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const startEditing = () => {
@@ -112,7 +114,7 @@ export function ListHeader({ listId, title, taskCount }: ListHeaderProps) {
             </DropdownMenuItem>
             <DropdownMenuItem
               variant="destructive"
-              onClick={handleDelete}
+              onClick={() => setConfirmDelete(true)}
               disabled={loading}
             >
               <Trash2 size={14} />
@@ -121,6 +123,15 @@ export function ListHeader({ listId, title, taskCount }: ListHeaderProps) {
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
+      <ConfirmModal
+        open={confirmDelete}
+        title="Eliminar lista"
+        description={`¿Eliminar "${savedTitle}"? Se eliminarán todas las tareas que contiene.`}
+        confirmLabel="Eliminar"
+        loading={loading}
+        onConfirm={handleDelete}
+        onCancel={() => setConfirmDelete(false)}
+      />
     </div>
   );
 }
