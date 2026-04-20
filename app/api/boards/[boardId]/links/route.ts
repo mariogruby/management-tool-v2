@@ -23,7 +23,7 @@ export async function GET(_req: Request, { params }: Params) {
   if (!allowed) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   const board = await db.board.findUnique({ where: { id: boardId }, select: { links: true } });
-  return NextResponse.json((board?.links ?? []) as BoardLink[]);
+  return NextResponse.json((board?.links ?? []) as unknown as BoardLink[]);
 }
 
 export async function PUT(req: Request, { params }: Params) {
