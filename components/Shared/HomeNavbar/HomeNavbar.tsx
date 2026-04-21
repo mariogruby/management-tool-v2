@@ -14,11 +14,14 @@ export async function HomeNavbar() {
         Kiki
       </Link>
 
-      <nav className="hidden sm:flex items-center gap-6 text-sm text-muted-foreground">
-        <Link href="#features" className="hover:text-foreground transition-colors">
+      <nav className="hidden sm:flex absolute left-1/2 -translate-x-1/2 items-center gap-6 text-sm text-muted-foreground">
+        <Link
+          href="/functions"
+          className="hover:text-foreground transition-colors"
+        >
           Funciones
         </Link>
-        <Link href="#stats" className="hover:text-foreground transition-colors">
+        <Link href="/stats" className="hover:text-foreground transition-colors">
           Estadísticas
         </Link>
       </nav>
