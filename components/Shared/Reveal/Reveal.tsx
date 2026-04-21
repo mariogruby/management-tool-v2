@@ -48,7 +48,7 @@ export function Reveal(props: RevealProps) {
   }, [isInView]);
 
   return (
-    <div ref={ref}>
+    <div ref={ref} className="overflow-hidden">
       <motion.div
         className={className}
         variants={fadeIn(position, delay)}
