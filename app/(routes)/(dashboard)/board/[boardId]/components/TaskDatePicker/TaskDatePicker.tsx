@@ -166,9 +166,11 @@ export function TaskDatePicker({
                   type="time"
                   value={`${dueHour}:${dueMinute}`}
                   onChange={(e) => {
-                    const [h, m] = e.target.value.split(":");
-                    setDueHour(h);
-                    setDueMinute(m);
+                    const val = e.target.value;
+                    if (!val) return;
+                    const [h, m] = val.split(":");
+                    if (h) setDueHour(h.padStart(2, "0"));
+                    if (m) setDueMinute(m.padStart(2, "0"));
                   }}
                   className="rounded-md border bg-transparent px-2 py-1 text-sm outline-none focus:ring-1 focus:ring-ring"
                 />
