@@ -65,10 +65,14 @@ export function BoardMembers({ boardId, open, onClose }: Props) {
   };
 
   const removeMember = async (memberId: string) => {
-    setMembers((prev) => prev.filter((m) => m.id !== memberId));
-    await fetch(`/api/boards/${boardId}/members/${memberId}`, {
+    const res = await fetch(`/api/boards/${boardId}/members/${memberId}`, {
       method: "DELETE",
     });
+    if (res.ok) {
+      setMembers((prev) => prev.filter((m) => m.id !== memberId));
+    } else {
+      setError("No se pudo eliminar el miembro. Inténtalo de nuevo.");
+    }
   };
 
   return (

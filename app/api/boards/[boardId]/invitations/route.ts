@@ -87,26 +87,83 @@ export async function POST(
 
   const inviteUrl = `${process.env.NEXT_PUBLIC_APP_URL}/invite/${invitation.token}`;
 
+  const inviterName = user.name ?? user.email;
+  const year = new Date().getFullYear();
+
   await resend.emails.send({
-    from: "no-reply@easypostool.com",
+    from: "updates.mailing.com",
     to: normalizedEmail,
-    subject: `${user.name ?? user.email} te invita a "${board.title}"`,
-    html: `
-      <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:24px">
-        <h2 style="margin-bottom:8px">Te han invitado a un board</h2>
-        <p style="color:#555;margin-bottom:24px">
-          <strong>${user.name ?? user.email}</strong> te ha invitado a colaborar en el board
-          <strong>"${board.title}"</strong>.
-        </p>
-        <a href="${inviteUrl}"
-           style="display:inline-block;background:#000;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600">
-          Aceptar invitación
-        </a>
-        <p style="color:#999;font-size:12px;margin-top:24px">
-          Este enlace expira en 7 días.
-        </p>
-      </div>
-    `,
+    subject: `${inviterName} te invita a "${board.title}"`,
+    html: `<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Invitación a Kiki</title>
+  </head>
+  <body style="margin:0;padding:0;background-color:#f4f4f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f5;padding:40px 16px;">
+      <tr>
+        <td align="center">
+          <table width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;background:#ffffff;border-radius:12px;border:1px solid #e4e4e7;overflow:hidden;">
+            <tr>
+              <td style="background:#09090b;padding:24px 32px;">
+                <table cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td style="padding-right:10px;">
+                      <div style="width:28px;height:28px;background:#ffffff20;border-radius:6px;display:inline-block;text-align:center;line-height:28px;font-size:16px;">⊞</div>
+                    </td>
+                    <td>
+                      <span style="color:#ffffff;font-size:18px;font-weight:700;letter-spacing:-0.3px;">Kiki</span>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:36px 32px 24px;">
+                <p style="margin:0 0 6px;font-size:13px;font-weight:600;color:#71717a;text-transform:uppercase;letter-spacing:0.8px;">Invitación a colaborar</p>
+                <h1 style="margin:0 0 16px;font-size:22px;font-weight:700;color:#09090b;line-height:1.3;">Te han invitado a un board</h1>
+                <p style="margin:0 0 28px;font-size:15px;color:#52525b;line-height:1.6;">
+                  <strong style="color:#09090b;">${inviterName}</strong> te ha invitado a colaborar en el board
+                  <strong style="color:#09090b;">"${board.title}"</strong> en Kiki.
+                </p>
+                <table cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td style="border-radius:8px;background:#09090b;">
+                      <a href="${inviteUrl}" style="display:inline-block;padding:13px 28px;color:#ffffff;font-size:14px;font-weight:600;text-decoration:none;border-radius:8px;letter-spacing:0.1px;">
+                        Aceptar invitación →
+                      </a>
+                    </td>
+                  </tr>
+                </table>
+                <p style="margin:20px 0 0;font-size:12px;color:#a1a1aa;">
+                  O copia este enlace en tu navegador:<br/>
+                  <a href="${inviteUrl}" style="color:#09090b;word-break:break-all;">${inviteUrl}</a>
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:0 32px;">
+                <hr style="border:none;border-top:1px solid #f0f0f0;margin:0;" />
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:20px 32px 28px;">
+                <p style="margin:0;font-size:12px;color:#a1a1aa;line-height:1.6;">
+                  Este enlace expira en <strong>7 días</strong>. Si no esperabas esta invitación, puedes ignorar este email con seguridad.
+                </p>
+                <p style="margin:10px 0 0;font-size:12px;color:#d4d4d8;">
+                  © ${year} Kiki · Gestión de proyectos
+                </p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>`,
   });
 
   return NextResponse.json(invitation, { status: 201 });
