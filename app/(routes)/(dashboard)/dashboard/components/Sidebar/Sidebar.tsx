@@ -8,13 +8,16 @@ import {
 } from "@/components/ui/sidebar";
 import { SidebarRoutes } from "../SidebarRoutes/SidebarRoutes";
 import { SidebarUserFooter } from "../SidebarUserFooter/SidebarUserFooter";
+import { SidebarLogo } from "../SidebarLogo/SidebarLogo";
 
 export async function AppSidebar() {
   const user = await currentUser();
 
   return (
     <Sidebar>
-      <SidebarHeader />
+      <SidebarHeader className="p-3 border-b">
+        <SidebarLogo />
+      </SidebarHeader>
       <SidebarContent>
         <SidebarGroup />
         <SidebarRoutes />
