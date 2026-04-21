@@ -200,9 +200,9 @@ export default async function DashboardPage() {
           <CreateBoardModal />
         </div>
         <RecentBoards boards={boards} />
-        <div className="mt-4">
+        {/* <div className="mt-4">
           <BoardList boards={boards} />
-        </div>
+        </div> */}
       </div>
     </div>
   );
