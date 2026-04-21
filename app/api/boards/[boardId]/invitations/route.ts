@@ -90,11 +90,13 @@ export async function POST(
   const inviterName = user.name ?? user.email;
   const year = new Date().getFullYear();
 
-  const { error: emailError } = await resend.emails.send({
-    from: "no-reply@kikiboard.xyz",
-    to: normalizedEmail,
-    subject: `${inviterName} te invita a "${board.title}"`,
-    html: `<!DOCTYPE html>
+  let emailError: unknown = null;
+  try {
+    const { error } = await resend.emails.send({
+      from: "no-reply@kikiboard.xyz",
+      to: normalizedEmail,
+      subject: `${inviterName} te invita a "${board.title}"`,
+      html: `<!DOCTYPE html>
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
@@ -164,7 +166,11 @@ export async function POST(
     </table>
   </body>
 </html>`,
-  });
+    });
+    emailError = error;
+  } catch (err) {
+    emailError = err;
+  }
 
   if (emailError) {
     console.error("[RESEND ERROR]", emailError);

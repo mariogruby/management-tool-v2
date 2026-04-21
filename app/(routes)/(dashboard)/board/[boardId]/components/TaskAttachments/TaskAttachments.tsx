@@ -54,8 +54,10 @@ export const TaskAttachments = forwardRef<TaskAttachmentsHandle, { taskId: strin
         method: "POST",
         body: formData,
       });
-      const attachment = await res.json();
-      setAttachments((prev) => [...prev, attachment]);
+      if (res.ok) {
+        const attachment = await res.json();
+        setAttachments((prev) => [...prev, attachment]);
+      }
       setUploading(false);
     };
 
@@ -65,10 +67,12 @@ export const TaskAttachments = forwardRef<TaskAttachmentsHandle, { taskId: strin
     };
 
     const handleDelete = async (attachmentId: string) => {
-      setAttachments((prev) => prev.filter((a) => a.id !== attachmentId));
-      await fetch(`/api/tasks/${taskId}/attachments/${attachmentId}`, {
+      const prev = attachments;
+      setAttachments(prev.filter((a) => a.id !== attachmentId));
+      const res = await fetch(`/api/tasks/${taskId}/attachments/${attachmentId}`, {
         method: "DELETE",
       });
+      if (!res.ok) setAttachments(prev);
     };
 
     return (

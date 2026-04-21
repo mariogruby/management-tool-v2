@@ -150,7 +150,7 @@ export default async function DashboardPage() {
       where: {
         completed: true,
         completedAt: { gte: last7Days },
-        list: { boardId: { in: boardIds } },
+        completedById: user.id,
       },
       select: { completedAt: true },
     }),

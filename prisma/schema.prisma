@@ -21,8 +21,9 @@ model User {
   comments      Comment[]
   boardMembers  BoardMember[]
   taskAssignees TaskAssignee[]
-  notifications Notification[]
-  activityLogs  ActivityLog[]
+  notifications   Notification[]
+  activityLogs    ActivityLog[]
+  completedTasks  Task[]        @relation("CompletedTasks")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -120,9 +121,11 @@ model Task {
   id          String  @id @default(cuid())
   title       String
   description String?
-  completed   Boolean   @default(false)
-  completedAt DateTime?
-  priority    String?
+  completed     Boolean   @default(false)
+  completedAt   DateTime?
+  completedById String?
+  completedBy   User?     @relation("CompletedTasks", fields: [completedById], references: [id], onDelete: SetNull)
+  priority      String?
   startDate   DateTime?
   dueDate     DateTime?
 

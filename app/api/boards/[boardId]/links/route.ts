@@ -26,6 +26,41 @@ export async function GET(_req: Request, { params }: Params) {
   return NextResponse.json((board?.links ?? []) as unknown as BoardLink[]);
 }
 
+const MAX_LINKS = 50;
+const MAX_LABEL = 100;
+const MAX_URL = 2048;
+
+function isValidUrl(value: string) {
+  try {
+    const u = new URL(value);
+    return u.protocol === "http:" || u.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
+function sanitizeLinks(input: unknown): BoardLink[] | null {
+  if (!Array.isArray(input)) return null;
+  if (input.length > MAX_LINKS) return null;
+  const result: BoardLink[] = [];
+  for (const item of input) {
+    if (!item || typeof item !== "object") return null;
+    const { id, label, url } = item as Record<string, unknown>;
+    if (
+      typeof id !== "string" ||
+      typeof label !== "string" ||
+      typeof url !== "string"
+    ) return null;
+    const trimmedLabel = label.trim();
+    const trimmedUrl = url.trim();
+    if (!id || !trimmedLabel || !trimmedUrl) return null;
+    if (trimmedLabel.length > MAX_LABEL || trimmedUrl.length > MAX_URL) return null;
+    if (!isValidUrl(trimmedUrl)) return null;
+    result.push({ id, label: trimmedLabel, url: trimmedUrl });
+  }
+  return result;
+}
+
 export async function PUT(req: Request, { params }: Params) {
   const { boardId } = await params;
   const { userId } = await auth();
@@ -36,9 +71,14 @@ export async function PUT(req: Request, { params }: Params) {
 
   const board = await db.board.findUnique({ where: { id: boardId } });
   if (!board || board.userId !== user.id)
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-  const links: BoardLink[] = await req.json();
+  const payload = await req.json();
+  const links = sanitizeLinks(payload);
+  if (!links) {
+    return NextResponse.json({ error: "Invalid links payload" }, { status: 400 });
+  }
+
   const updated = await db.board.update({
     where: { id: boardId },
     data: { links: links as unknown as object[] },

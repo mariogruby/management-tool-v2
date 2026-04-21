@@ -38,16 +38,20 @@ export function TaskComments({ taskId }: TaskCommentsProps) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ content: trimmed }),
     });
-    const comment = await res.json();
-    setComments((prev) => [...prev, comment]);
-    setValue("");
-    if (textareaRef.current) textareaRef.current.style.height = "24px";
+    if (res.ok) {
+      const comment = await res.json();
+      setComments((prev) => [...prev, comment]);
+      setValue("");
+      if (textareaRef.current) textareaRef.current.style.height = "24px";
+    }
     setLoading(false);
   };
 
   const deleteComment = async (commentId: string) => {
-    await fetch(`/api/tasks/${taskId}/comments/${commentId}`, { method: "DELETE" });
-    setComments((prev) => prev.filter((c) => c.id !== commentId));
+    const res = await fetch(`/api/tasks/${taskId}/comments/${commentId}`, { method: "DELETE" });
+    if (res.ok) {
+      setComments((prev) => prev.filter((c) => c.id !== commentId));
+    }
   };
 
   return (

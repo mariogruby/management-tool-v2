@@ -66,16 +66,21 @@ export function TaskSubtasks({ taskId, listId }: TaskSubtasksProps) {
 
   const toggleCompleted = async (subtask: Subtask) => {
     const next = !subtask.completed;
+    const prev = subtasks;
     const updated = subtasks.map((s) =>
       s.id === subtask.id ? { ...s, completed: next } : s,
     );
     setSubtasks(updated);
     syncStore(updated);
-    await fetch(`/api/tasks/${taskId}/subtasks/${subtask.id}`, {
+    const res = await fetch(`/api/tasks/${taskId}/subtasks/${subtask.id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ completed: next }),
     });
+    if (!res.ok) {
+      setSubtasks(prev);
+      syncStore(prev);
+    }
   };
 
   const startEdit = (subtask: Subtask) => {
@@ -88,22 +93,29 @@ export function TaskSubtasks({ taskId, listId }: TaskSubtasksProps) {
       setEditingId(null);
       return;
     }
-    setSubtasks((prev) =>
+    const prev = subtasks;
+    setSubtasks(
       prev.map((s) => (s.id === id ? { ...s, title: editingTitle.trim() } : s)),
     );
     setEditingId(null);
-    await fetch(`/api/tasks/${taskId}/subtasks/${id}`, {
+    const res = await fetch(`/api/tasks/${taskId}/subtasks/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ title: editingTitle.trim() }),
     });
+    if (!res.ok) setSubtasks(prev);
   };
 
   const deleteSubtask = async (id: string) => {
-    const updated = subtasks.filter((s) => s.id !== id);
+    const prev = subtasks;
+    const updated = prev.filter((s) => s.id !== id);
     setSubtasks(updated);
     syncStore(updated);
-    await fetch(`/api/tasks/${taskId}/subtasks/${id}`, { method: "DELETE" });
+    const res = await fetch(`/api/tasks/${taskId}/subtasks/${id}`, { method: "DELETE" });
+    if (!res.ok) {
+      setSubtasks(prev);
+      syncStore(prev);
+    }
   };
 
   return (

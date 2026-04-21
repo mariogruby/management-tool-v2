@@ -58,10 +58,12 @@ export function BoardMembers({ boardId, open, onClose }: Props) {
   };
 
   const cancelInvitation = async (invitationId: string) => {
-    setInvitations((prev) => prev.filter((i) => i.id !== invitationId));
-    await fetch(`/api/boards/${boardId}/invitations/${invitationId}`, {
+    const prev = invitations;
+    setInvitations(prev.filter((i) => i.id !== invitationId));
+    const res = await fetch(`/api/boards/${boardId}/invitations/${invitationId}`, {
       method: "DELETE",
     });
+    if (!res.ok) setInvitations(prev);
   };
 
   const removeMember = async (memberId: string) => {

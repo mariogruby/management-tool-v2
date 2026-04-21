@@ -18,6 +18,11 @@ export async function DELETE(
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
+  const member = await db.boardMember.findUnique({ where: { id: memberId } });
+  if (!member || member.boardId !== boardId) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
   await db.boardMember.delete({ where: { id: memberId } });
 
   return NextResponse.json({ success: true });

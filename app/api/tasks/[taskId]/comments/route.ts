@@ -11,6 +11,18 @@ export async function GET(
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
+  const user = await db.user.findUnique({ where: { clerkId: userId } });
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const task = await db.task.findUnique({
+    where: { id: taskId },
+    include: { list: { include: { board: true } } },
+  });
+  if (!task) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
+  const allowed = await hasBoardAccess(user.id, task.list.board.id);
+  if (!allowed) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
   const comments = await db.comment.findMany({
     where: { taskId },
     include: { user: { select: { name: true, email: true } } },
@@ -43,28 +55,31 @@ export async function POST(
   const allowed = await hasBoardAccess(user.id, task.list.board.id);
   if (!allowed) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-  const comment = await db.comment.create({
-    data: { content: content.trim(), taskId, userId: user.id },
-    include: { user: { select: { name: true, email: true } } },
-  });
-
-  // Notify assignees (skip the commenter)
   const assignees = await db.taskAssignee.findMany({
     where: { taskId, userId: { not: user.id } },
     select: { userId: true },
   });
-  if (assignees.length > 0) {
-    const actorName = user.name ?? user.email;
-    await db.notification.createMany({
-      data: assignees.map((a) => ({
-        type: "comment",
-        message: `${actorName} comentó en la tarea "${task.title}"`,
-        userId: a.userId,
-        boardId: task.list.board.id,
-        taskId,
-      })),
-    });
-  }
+
+  const actorName = user.name ?? user.email;
+  const [comment] = await db.$transaction([
+    db.comment.create({
+      data: { content: content.trim(), taskId, userId: user.id },
+      include: { user: { select: { name: true, email: true } } },
+    }),
+    ...(assignees.length > 0
+      ? [
+          db.notification.createMany({
+            data: assignees.map((a) => ({
+              type: "comment",
+              message: `${actorName} comentó en la tarea "${task.title}"`,
+              userId: a.userId,
+              boardId: task.list.board.id,
+              taskId,
+            })),
+          }),
+        ]
+      : []),
+  ]);
 
   return NextResponse.json(comment, { status: 201 });
 }

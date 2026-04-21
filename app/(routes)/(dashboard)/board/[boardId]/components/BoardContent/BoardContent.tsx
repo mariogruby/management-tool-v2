@@ -17,6 +17,7 @@ import {
 import {
   SortableContext,
   horizontalListSortingStrategy,
+  arrayMove,
 } from "@dnd-kit/sortable";
 import type { TaskModel } from "@/lib/generated/prisma/models/Task";
 import type { ListWithTasks, TaskWithLabels } from "../TaskCard/TaskCard.types";
@@ -173,6 +174,7 @@ export function BoardContent({
     if (active.data.current?.type === "list" && active.id !== over.id) {
       const oldIndex = lists.findIndex((l) => l.id === active.id);
       const newIndex = lists.findIndex((l) => l.id === over.id);
+      const reordered = arrayMove(lists, oldIndex, newIndex);
       reorderLists(oldIndex, newIndex);
 
       fetch("/api/lists/updateOrder", {
@@ -180,7 +182,7 @@ export function BoardContent({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           boardId,
-          lists: lists.map((l, i) => ({ id: l.id, order: i })),
+          lists: reordered.map((l, i) => ({ id: l.id, order: i })),
         }),
       });
     }

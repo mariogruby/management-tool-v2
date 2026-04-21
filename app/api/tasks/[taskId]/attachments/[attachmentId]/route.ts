@@ -27,7 +27,11 @@ export async function DELETE(
   const allowed = await hasBoardAccess(user.id, attachment.task.list.board.id);
   if (!allowed) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-  await del(attachment.url);
+  try {
+    await del(attachment.url);
+  } catch (err) {
+    console.error("[BLOB DEL ERROR]", err);
+  }
   await db.attachment.delete({ where: { id: attachmentId } });
 
   return NextResponse.json({ success: true });

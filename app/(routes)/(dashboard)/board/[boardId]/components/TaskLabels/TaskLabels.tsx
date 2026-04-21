@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { Tag, Pencil, Trash2, Check } from "lucide-react";
-
 import type { LabelModel } from "@/lib/generated/prisma/models/Label";
 import { TaskLabelsProps } from "./TaskLabels.types";
 import {
@@ -11,21 +10,8 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
-
 import { Checkbox } from "@/components/ui/checkbox";
-
-const PRESET_COLORS = [
-  "#ef4444",
-  "#f97316",
-  "#eab308",
-  "#22c55e",
-  "#06b6d4",
-  "#3b82f6",
-  "#8b5cf6",
-  "#ec4899",
-  "#6b7280",
-  "#14b8a6",
-];
+import { PRESET_COLORS } from "./TaskLabels.data";
 
 export function TaskLabels({ taskId, boardId, activeLabels, onLabelsChange }: TaskLabelsProps) {
   const [open, setOpen] = useState(false);
@@ -86,6 +72,7 @@ export function TaskLabels({ taskId, boardId, activeLabels, onLabelsChange }: Ta
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ title: formTitle, color: formColor }),
       });
+      if (!res.ok) return;
       const updated = await res.json();
       setLabels((prev) => prev.map((l) => (l.id === updated.id ? updated : l)));
     } else {
@@ -94,6 +81,7 @@ export function TaskLabels({ taskId, boardId, activeLabels, onLabelsChange }: Ta
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ title: formTitle, color: formColor }),
       });
+      if (!res.ok) return;
       const created = await res.json();
       setLabels((prev) => [...prev, created]);
     }
@@ -101,7 +89,8 @@ export function TaskLabels({ taskId, boardId, activeLabels, onLabelsChange }: Ta
   };
 
   const deleteLabel = async (labelId: string) => {
-    await fetch(`/api/labels/label/${labelId}`, { method: "DELETE" });
+    const res = await fetch(`/api/labels/label/${labelId}`, { method: "DELETE" });
+    if (!res.ok) return;
     const nextLabels = labels.filter((l) => l.id !== labelId);
     setLabels(nextLabels);
     const nextIds = new Set(activeIds);

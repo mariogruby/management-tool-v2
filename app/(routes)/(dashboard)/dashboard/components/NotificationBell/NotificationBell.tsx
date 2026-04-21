@@ -54,13 +54,17 @@ export function NotificationBell() {
   }, [fetchNotifications]);
 
   const markAllRead = async () => {
-    await fetch("/api/notifications", { method: "PATCH" });
+    const prev = notifications;
     setNotifications([]);
+    const res = await fetch("/api/notifications", { method: "PATCH" });
+    if (!res.ok) setNotifications(prev);
   };
 
   const markOneRead = async (id: string) => {
-    await fetch(`/api/notifications/${id}`, { method: "PATCH" });
-    setNotifications((prev) => prev.filter((n) => n.id !== id));
+    const prev = notifications;
+    setNotifications((p) => p.filter((n) => n.id !== id));
+    const res = await fetch(`/api/notifications/${id}`, { method: "PATCH" });
+    if (!res.ok) setNotifications(prev);
   };
 
   const unreadCount = notifications.length;

@@ -12,6 +12,18 @@ export async function GET(
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
+  const user = await db.user.findUnique({ where: { clerkId: userId } });
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const task = await db.task.findUnique({
+    where: { id: taskId },
+    include: { list: { include: { board: true } } },
+  });
+  if (!task) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
+  const allowed = await hasBoardAccess(user.id, task.list.board.id);
+  if (!allowed) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
   const attachments = await db.attachment.findMany({
     where: { taskId },
     orderBy: { createdAt: "asc" },
@@ -44,10 +56,16 @@ export async function POST(
   const file = formData.get("file") as File | null;
   if (!file) return NextResponse.json({ error: "No file provided" }, { status: 400 });
 
-  const blob = await put(`attachments/${taskId}/${file.name}`, file, {
-    access: "private",
-    addRandomSuffix: true,
-  });
+  let blob;
+  try {
+    blob = await put(`attachments/${taskId}/${file.name}`, file, {
+      access: "private",
+      addRandomSuffix: true,
+    });
+  } catch (err) {
+    console.error("[BLOB PUT ERROR]", err);
+    return NextResponse.json({ error: "No se pudo subir el archivo" }, { status: 502 });
+  }
 
   const attachment = await db.attachment.create({
     data: {

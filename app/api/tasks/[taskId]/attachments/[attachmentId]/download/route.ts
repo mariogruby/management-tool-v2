@@ -1,6 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import db from "@/lib/db";
+import { hasBoardAccess } from "@/lib/boardAccess";
 
 export async function GET(
   _req: Request,
@@ -18,19 +19,24 @@ export async function GET(
     include: { task: { include: { list: { include: { board: true } } } } },
   });
 
-  if (
-    !attachment ||
-    attachment.taskId !== taskId ||
-    attachment.task.list.board.userId !== user.id
-  ) {
+  if (!attachment || attachment.taskId !== taskId) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  const response = await fetch(attachment.url, {
-    headers: {
-      Authorization: `Bearer ${process.env.BLOB_READ_WRITE_TOKEN}`,
-    },
-  });
+  const allowed = await hasBoardAccess(user.id, attachment.task.list.board.id);
+  if (!allowed) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
+  let response: Response;
+  try {
+    response = await fetch(attachment.url, {
+      headers: {
+        Authorization: `Bearer ${process.env.BLOB_READ_WRITE_TOKEN}`,
+      },
+    });
+  } catch (err) {
+    console.error("[BLOB FETCH ERROR]", err);
+    return NextResponse.json({ error: "Failed to fetch file" }, { status: 502 });
+  }
 
   if (!response.ok) {
     return NextResponse.json({ error: "Failed to fetch file" }, { status: 502 });

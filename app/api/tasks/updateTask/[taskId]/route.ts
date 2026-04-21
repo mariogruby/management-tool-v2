@@ -44,6 +44,7 @@ export async function PATCH(
       ...(completed !== undefined && {
         completed,
         completedAt: completed ? new Date() : null,
+        completedById: completed ? user.id : null,
       }),
       ...(startDate !== undefined && {
         startDate: startDate ? new Date(startDate) : null,
