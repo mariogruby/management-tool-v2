@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { LayoutDashboard } from "lucide-react";
+import { KikiLogo } from "@/components/Shared/KikiLogo/KikiLogo";
 
 export function HomeFooter() {
   return (
@@ -8,7 +8,7 @@ export function HomeFooter() {
         href="/"
         className="flex items-center gap-2 font-semibold text-foreground"
       >
-        <LayoutDashboard size={16} className="text-primary" />
+        <KikiLogo size={16} />
         Kiki
       </Link>
       <p className="sm:absolute sm:left-1/2 sm:-translate-x-1/2">© {new Date().getFullYear()} Kiki. Todos los derechos reservados.</p>

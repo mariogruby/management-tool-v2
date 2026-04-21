@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { LayoutDashboard } from "lucide-react";
+import { KikiLogo } from "@/components/Shared/KikiLogo/KikiLogo";
 
 export default function AuthLayout({
   children,
@@ -29,7 +29,7 @@ export default function AuthLayout({
 
         {/* Logo */}
         <Link href="/" className="relative flex items-center gap-2 font-bold text-xl z-10">
-          <LayoutDashboard size={22} className="text-violet-400" />
+          <KikiLogo size={22} color="#a78bfa" />
           Kiki
         </Link>
 
@@ -85,7 +85,7 @@ export default function AuthLayout({
       <div className="flex-1 flex flex-col items-center justify-center p-6 bg-background">
         {/* Mobile logo */}
         <Link href="/" className="lg:hidden flex items-center gap-2 font-bold text-xl mb-8">
-          <LayoutDashboard size={20} className="text-primary" />
+          <KikiLogo size={20} color="#a78bfa" />
           Kiki
         </Link>
 

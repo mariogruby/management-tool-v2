@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { LayoutDashboard } from "lucide-react";
 import { auth } from "@clerk/nextjs/server";
 import { InteractiveHoverButton } from "@/components/ui/interactive-hover-button";
+import { KikiLogo } from "@/components/Shared/KikiLogo/KikiLogo";
 
 export async function HomeNavbar() {
   const { userId } = await auth();
@@ -10,7 +10,7 @@ export async function HomeNavbar() {
   return (
     <header className="fixed top-0 inset-x-0 z-50 flex items-center justify-between px-4 sm:px-8 h-16 border-b bg-background/80 backdrop-blur-sm">
       <Link href="/" className="flex items-center gap-2 font-bold text-lg">
-        <LayoutDashboard size={20} className="text-primary" />
+        <KikiLogo size={20} />
         Kiki
       </Link>
 

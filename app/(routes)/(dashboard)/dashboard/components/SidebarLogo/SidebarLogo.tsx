@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { LayoutDashboard } from "lucide-react";
+import { KikiLogo } from "@/components/Shared/KikiLogo/KikiLogo";
 
 export function SidebarLogo() {
   return (
@@ -7,7 +7,7 @@ export function SidebarLogo() {
       href="/"
       className="flex items-center gap-2 font-bold text-lg px-2 py-0.5"
     >
-      <LayoutDashboard size={20} className="text-primary shrink-0" />
+      <KikiLogo size={20} />
       <span>Kiki</span>
     </Link>
   );
