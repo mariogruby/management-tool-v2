@@ -1,6 +1,7 @@
-import { auth, currentUser } from "@clerk/nextjs/server";
+import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import db from "@/lib/db";
+import { getOrCreateUser } from "@/lib/getOrCreateUser";
 
 export async function POST(req: Request) {
   const { userId } = await auth();
@@ -15,22 +16,8 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Title is required" }, { status: 400 });
   }
 
-  let user = await db.user.findUnique({ where: { clerkId: userId } });
-
-  if (!user) {
-    const clerkUser = await currentUser();
-    if (!clerkUser) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    user = await db.user.create({
-      data: {
-        clerkId: userId,
-        email: clerkUser.emailAddresses[0].emailAddress,
-        name: `${clerkUser.firstName ?? ""} ${clerkUser.lastName ?? ""}`.trim() || null,
-      },
-    });
-  }
+  const user = await getOrCreateUser(userId);
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const validLists: string[] = Array.isArray(lists)
     ? lists.filter((l: unknown) => typeof l === "string" && l.trim())
