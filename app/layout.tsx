@@ -35,6 +35,10 @@ export const metadata: Metadata = {
     title: "Kiki — Gestión de proyectos",
     description: "Organiza proyectos, colabora con tu equipo y alcanza tus objetivos.",
   },
+  icons: {
+    icon: "/kikilogo.ico",
+    shortcut: "/kikilogo.ico",
+  },
 };
 
 export default function RootLayout({
