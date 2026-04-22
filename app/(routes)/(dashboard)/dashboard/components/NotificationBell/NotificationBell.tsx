@@ -10,16 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-
-type Notification = {
-  id: string;
-  type: string;
-  message: string;
-  read: boolean;
-  boardId: string | null;
-  taskId: string | null;
-  createdAt: string;
-};
+import { Notification } from "./NotificationBell.types";
 
 const POLL_INTERVAL = 30_000; // 30 seconds
 

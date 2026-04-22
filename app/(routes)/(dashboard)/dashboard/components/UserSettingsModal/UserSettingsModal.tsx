@@ -5,11 +5,7 @@ import { X, LogOut } from "lucide-react";
 import { UserProfile, useClerk } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { ConfirmModal } from "@/components/Shared/ModalDeleteConfirmation/ModalDeleteConfirmation";
-
-interface UserSettingsModalProps {
-  open: boolean;
-  onClose: () => void;
-}
+import { UserSettingsModalProps } from "./UserSettingsModal.types";
 
 export function UserSettingsModal({ open, onClose }: UserSettingsModalProps) {
   const { signOut } = useClerk();

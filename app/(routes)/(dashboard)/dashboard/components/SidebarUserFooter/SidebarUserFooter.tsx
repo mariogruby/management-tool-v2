@@ -4,12 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { Settings } from "lucide-react";
 import { UserSettingsModal } from "../UserSettingsModal/UserSettingsModal";
-
-interface SidebarUserFooterProps {
-  name: string | null;
-  email: string;
-  imageUrl: string | null;
-}
+import { SidebarUserFooterProps } from "./SidebarUserFooter.types";
 
 export function SidebarUserFooter({ name, email, imageUrl }: SidebarUserFooterProps) {
   const [open, setOpen] = useState(false);
