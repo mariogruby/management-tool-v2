@@ -4,6 +4,7 @@ import { Outfit, Figtree } from "next/font/google";
 import { Toaster } from "sonner";
 import "./globals.css";
 import { cn } from "@/lib/utils";
+import { CookieBanner } from "@/components/CookieBanner";
 
 const figtree = Figtree({subsets:['latin'],variable:'--font-sans'});
 
@@ -52,6 +53,7 @@ export default function RootLayout({
         <ClerkProvider>
           {children}
           <Toaster richColors closeButton position="bottom-right" />
+          <CookieBanner />
         </ClerkProvider>
       </body>
     </html>

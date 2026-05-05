@@ -14,6 +14,12 @@ export function HomeFooter() {
       <p className="sm:absolute sm:left-1/2 sm:-translate-x-1/2">© {new Date().getFullYear()} Kiki. Todos los derechos reservados.</p>
       <div className="flex items-center gap-4">
         <Link
+          href="/privacy"
+          className="hover:text-foreground transition-colors"
+        >
+          Política de Privacidad
+        </Link>
+        <Link
           href="/sign-in"
           className="hover:text-foreground transition-colors"
         >
